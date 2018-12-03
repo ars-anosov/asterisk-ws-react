@@ -1,0 +1,33 @@
+{
+  "name": "asterisk-ws-react",
+  "version": "1.0.0",
+  "description": "asterisk-ws-react",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ars-anosov/asterisk-ws-react.git"
+  },
+  "keywords": [
+    "asterisk",
+    "reactjs",
+    "redux",
+    "ami"
+  ],
+  "author": "Arseniy Anosov",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ars-anosov/asterisk-ws-react/issues"
+  },
+  "homepage": "https://github.com/ars-anosov/asterisk-ws-react#readme",
+  "devDependencies": {
+    "log4js": "^3.0.6"
+  },
+  "dependencies": {
+    "express": "^4.16.4",
+    "nami": "^0.7.2",
+    "swagger-tools": "^0.10.4"
+  }
+}
