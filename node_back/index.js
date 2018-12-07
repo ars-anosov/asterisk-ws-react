@@ -1,8 +1,8 @@
 'use strict';
 
 // arg
-if (process.argv.length !== 7) {
-  console.log("Usage: node index.js $AMI_HOST $AMI_PORT $AMI_USER $AMI_SECRET $OPENAPI_PORT")
+if (process.argv.length !== 8) {
+  console.log("Usage: node index.js $AMI_HOST $AMI_PORT $AMI_USER $AMI_SECRET $OPENAPI_PORT $WS_PORT")
   process.exit();
 }
 //  host: "192.168.30.29",
@@ -16,6 +16,14 @@ const amiPort     = process.argv[3]
 const amiUser     = process.argv[4]
 const amiSecret   = process.argv[5]
 const openApiPort = process.argv[6]
+const wsPort      = process.argv[7]
+
+const namiConfig = {
+  'host':     amiHost,
+  'port':     amiPort,
+  'username': amiUser,
+  'secret':   amiSecret
+}
 
 // fs
 const fs          = require('fs')
@@ -29,25 +37,43 @@ const express     = require('express')
 const swaggerTools  = require('swagger-tools')
 const jsyaml        = require('js-yaml')
 
-var aaa_handle    = require('./sub_modules/aaa_handle')
+// NAMI and logger
+const namiLib   = require('nami')
+const log4js    = require('log4js')
+
+const aaa_handle    = require('./sub_modules/aaa_handle')
+const namiTools     = require('./sub_modules/nami_tools')
+const wsTools       = require('./sub_modules/ws_tools')
 
 // Глобальный объект, будет асинхронно мутировать:
-var nami = {}
+var nami                = {}
 var coreShowChannelsObj = []
-const localDb = {
+var wsServer            = {}
+const localDb           = {
   'info': 'local base for Asterisk-WS-React',
-  'namiConfig': {
-    'host':     amiHost,
-    'port':     amiPort,
-    'username': amiUser,
-    'secret':   amiSecret
-  },
-  'coreShowChannelsObj': [],
-  'nami': nami
 }
 
+// loggers
+const logger = log4js.getLogger('index')
+logger.level = 'debug'
 
-console.log('\nlocalDb:')
+namiConfig.logger = log4js.getLogger('NAMI')
+namiConfig.logger.level = 'error'
+
+
+
+
+
+
+
+
+
+console.log('|------------------|')
+console.log('|\x1b[36m Start ARGUMENTS \x1b[0m|')
+console.log('|------------------|')
+console.log('amiConfig:')
+console.log(namiConfig)
+console.log('localDb:')
 console.log(localDb)
 console.log()
 
@@ -58,77 +84,81 @@ console.log()
 
 
 
-
 // NAMI
 // https://github.com/marcelog/Nami/blob/master/src/index.js
-
-const namiLib = require('nami')
-
-//localDb.namiConfig.logger = require('log4js').getLogger('Nami.Core')
-//localDb.namiConfig.logger.setLevel('ERROR')
-
-nami = new namiLib.Nami(localDb.namiConfig)
+nami = new namiLib.Nami(namiConfig)
 
 process.on('SIGINT', function () {
   nami.close();
   process.exit();
 })
 
-nami.on('namiConnectionClose', function (data) {
-  console.log('Reconnecting...');
+nami.on('namiConnectionClose', (data) => {
+  logger.warn('NAMI: Reconnecting...')
   setTimeout(function () { nami.open(); }, 5000)
-});
-nami.on('namiInvalidPeer', function (data) {
-  console.log("Invalid AMI Salute. Not an AMI?")
+})
+nami.on('namiInvalidPeer', (data) => {
+  logger.warn('NAMI: Invalid AMI Salute. Not an AMI?')
   process.exit();
-});
-nami.on('namiLoginIncorrect', function () {
-  console.log("Invalid Credentials")
+})
+nami.on('namiLoginIncorrect', (data) => {
+  logger.warn('NAMI: Invalid Credentials')
   process.exit();
 });
 
-nami.on('namiEvent', function (event) {
-  console.log('event -------------------------------------------:')
-  console.log(event.event)
-  if (event.event == 'HangupRequest') {
-    //
+var ShowChannelsintervalId = null
+nami.on('namiConnected', (data) => {
+  if (ShowChannelsintervalId) {
+    clearInterval(ShowChannelsintervalId)
   }
+  //ShowChannelsintervalId = setInterval( () => {
+  //  localDb.coreShowChannelsObj = namiTools.coreShowChannelsObjGet(nami)
+  //}, 1000)
+})
 
+// Start my interactive logic -------------------------------------------------
+// nami.on('namiEvent' ... всякое такое тут
+const namiEventRouter = require('./nami_logic/event_router')
+nami.on('namiEvent', (data) => {
+  namiEventRouter.handleEvent(data, wsServer)
 })
 
 nami.open()
+// NAMI end ----
 
 
-const namiAction = new namiLib.Actions.CoreShowChannels()
 
-/*
-setInterval(
-  () => {
-    coreShowChannelsObj = coreShowChannelsObjGet(namiAction)
-  }, 1000)
-*/
 
-function coreShowChannelsObjGet(action) { 
-  let respObj = []
 
-  nami.send(action, function (response) {
-    //console.log(' ---- Response: ' + util.inspect(response).slice(5));
-    //console.log(response.events[0]);
-    //var jsonObj = JSON.parse(response);
-    //console.log(jsonObj);
-    
-    for (var i in response.events) {
-      if (response.events[i].event == 'CoreShowChannel') {
-        //console.log(response.events[i])
-        respObj.push(response.events[i])
-      }
-    }
 
+
+
+
+// |--------------------------|
+// |     Websocket server     |
+// |--------------------------|
+// https://github.com/sitegui/nodejs-websocket/blob/master/samples/chat/server.js
+var ws = require("nodejs-websocket")
+
+// Мутирую глобальную переменную при каждом новом коннекте
+wsServer = ws.createServer(function (connection) {
+  
+  wsTools.wsNewConn(wsServer, connection)
+  
+  connection.on("close", function () {
+    wsTools.wsCloseConn(wsServer, connection)
+    //wsBroadcast(connection.nickname+" left")
   })
 
-  return respObj
-}
-// NAMI end ----
+})
+
+wsServer.listen(wsPort)
+console.log('|--------------------------|')
+console.log('|\x1b[36m Websocket server started \x1b[0m|')
+console.log('|--------------------------|')
+console.log('  ws://192.168.13.97:%d', wsPort)
+console.log('  connections now: ', wsServer.connections.length)
+console.log()
 
 
 
@@ -194,10 +224,10 @@ var httpStaticFiles = function (req, res, next) {
 
 // Наполнение req.localDb мутирующим глобальным объектом localDb
 var connectMyModules = function(req, res, next) {
-  localDb['nami'] = nami
-  localDb['coreShowChannelsObj'] = coreShowChannelsObj
-
-  req['localDb'] = localDb
+  req['nami']                 = nami
+  req['coreShowChannelsObj']  = coreShowChannelsObj
+  req['wsServer']             = wsServer
+  req['localDb']              = localDb
   next()
 }
 
@@ -217,6 +247,9 @@ var connectMyModules = function(req, res, next) {
 var eAppSwg = express()
 
 eAppSwg.get('/', (req, res) => res.send('Answer to the Ultimate Question of Life, the Universe, and Everything\n'))
+
+const htmlContentWsTest = fs.readFileSync('./ws_test.html', 'utf8')
+eAppSwg.get('/ws_test', (req, res) => res.send(htmlContentWsTest))
 
 swaggerTools.initializeMiddleware(swaggerDoc, function (middleware) {
   // Работаю с модулем swaggerTools (объект middleware) =============
@@ -261,7 +294,12 @@ swaggerTools.initializeMiddleware(swaggerDoc, function (middleware) {
 
   const httpServer = http.createServer(eAppSwg)
   httpServer.listen(openApiPort, () => {
-    console.log('express eAppSwg started on http server, port: '+openApiPort)
+    console.log('|------------------------------------|')
+    console.log('|\x1b[36m Asterisk WebSocket REACTOR started \x1b[0m|')
+    console.log('|------------------------------------|')
+    console.log('  Swagger-UI: http://192.168.13.97:'+openApiPort+'/spec-ui/')
+    console.log()
+    console.log()
   })
 
 })

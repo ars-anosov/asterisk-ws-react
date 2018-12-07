@@ -11,6 +11,7 @@
 - **AMI_USER** - Asterisk AMI User
 - **AMI_SECRET** - Asterisk AMI Secret
 - **OPENAPI_PORT=8018** - http порт на Pruduction машине для OpenAPI запросов к сервису
+- **WS_PORT=8019** - WebSocket порт на Pruduction машине
 
 Правим поле ***host*** в [node-back/api/swagger.yaml](https://gitlab.com/ars.anosov/asterisk-ws-react/blob/master/node_back/api/swagger.yaml)
 ```yaml
@@ -27,8 +28,8 @@ sudo docker run \
   -v $PWD:/asterisk-ws-reactor \
   -w /asterisk-ws-reactor \
   -e "AMI_HOST=192.168.30.29" -e "AMI_PORT=5038" -e "AMI_USER=helpdesk" -e "AMI_SECRET=helpdeskadmin" \
-  -e "OPENAPI_PORT=8018" \
-  -p 8018:8018 \
+  -e "OPENAPI_PORT=8018" -e "WS_PORT=8019" \
+  -p 8018:8018 -p 8019:8019 \
   -it \
   node:10 bash
 ```
@@ -39,12 +40,12 @@ sudo docker run \
 npm install
 
 # с отладкой в консоль
-node index.js $AMI_HOST $AMI_PORT $AMI_USER $AMI_SECRET $OPENAPI_PORT
+node index.js $AMI_HOST $AMI_PORT $AMI_USER $AMI_SECRET $OPENAPI_PORT $WS_PORT
 
 # либо через pm2 в Production
 pm2 start index.js \
   --name aster_ws --watch ./controllers --restart-delay 60000 \
-  -- $AMI_HOST $AMI_PORT $AMI_USER $AMI_SECRET $OPENAPI_PORT
+  -- $AMI_HOST $AMI_PORT $AMI_USER $AMI_SECRET $OPENAPI_PORT $WS_PORT
 # логи тут
 pm2 logs aster_ws
 ```

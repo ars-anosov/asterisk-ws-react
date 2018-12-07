@@ -28,6 +28,7 @@
   "dependencies": {
     "express": "^4.16.4",
     "nami": "^0.7.2",
+    "nodejs-websocket": "^1.7.2",
     "swagger-tools": "^0.10.4"
   }
 }
