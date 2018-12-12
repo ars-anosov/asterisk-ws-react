@@ -1,8 +1,8 @@
 'use strict';
 
 // arg
-if (process.argv.length !== 8) {
-  console.log("Usage: node index.js $AMI_HOST $AMI_PORT $AMI_USER $AMI_SECRET $OPENAPI_PORT $WS_PORT")
+if (process.argv.length < 11) {
+  console.log("Usage: node index.js $AMI_HOST $AMI_PORT $AMI_USER $AMI_SECRET $OPENAPI_PORT $WS_PORT $DB_HOST $DB_USER $DB_PASS")
   process.exit();
 }
 //  host: "192.168.30.29",
