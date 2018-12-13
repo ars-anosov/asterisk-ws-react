@@ -1,0 +1,274 @@
+@import "templates/SwgControl";
+
+body {
+  background-color: #eee;
+  /* https://www.transparenttextures.com/ */
+  /* background-image: url(../img/connected.png); */
+  /* font-family: "Ubuntu Mono"; */
+  margin: 0;
+  padding: 0;
+  font-family: sans-serif;
+  font-size: 12px;
+}
+
+.App {
+  font-family: inherit;
+  font-size: inherit;
+  padding: 4px;
+}
+
+.auth-win {
+  background: #fca130;
+  border: 2px solid #fff;
+  border-radius: 6px;
+  padding: 6px;
+  position: absolute;
+  top: 5%;
+  left: 50%;
+  margin: 0;
+  margin-right: -50%;
+  transform: translate(-50%, -50%);
+}
+
+table {
+  margin: 0px;
+  padding: 0px;  
+}
+tr {
+  margin: 0px;
+  padding: 0px;  
+}
+td {
+  margin: 0px;
+  padding: 0px;  
+}
+
+pre { 
+  font-family: inherit;
+  font-size: inherit;
+  margin: inherit;
+}
+
+a {
+
+}
+
+ul { 
+  padding-left: 20px;
+  padding-top: 10px;
+  margin: 1px;
+}
+li { 
+  font-family: inherit;
+  font-size: 14px;
+  padding: 2px;
+  margin: 2px;
+}
+
+div { 
+  font-family: inherit;
+  font-size: inherit;
+  margin: inherit;
+}
+
+form { 
+  font-family: inherit;
+  font-size: inherit;
+  margin: 1px;
+}
+
+input { 
+  font-size: 14px;
+  background-color: #fff; 
+  border: 1px solid #999;
+  border-radius: 4px; 
+  color: #228;
+  padding: 2px;
+}
+
+textarea {
+  font-size: 14px;
+  background-color: #ffffff; 
+  border: 1px solid #999999;
+  color: #444444; 
+  color: #228;
+  padding: 2px;
+}
+
+select { 
+  font-size: 14px;
+  background-color: #fff; 
+  border: 1px solid #999;
+  border-radius: 4px; 
+  color: #228;
+  padding: 2px;
+}
+
+button { 
+  font-family: inherit;
+  font-size: inherit;
+  background-color: #EEEEEE; 
+  border: 1px solid #999999;
+  border-radius: 4px; 
+  margin: inherit;
+}
+
+i {
+  font-size: 10px;
+}
+
+strong {
+  font-size: 12px;
+}
+
+hr {
+  color: #ccc;
+  background-color: #ccc;
+  height: 1px;
+  border: none;
+}
+
+h1, h2, h3, h4, h5 {
+  color: #449;
+  margin: 12px 4px;
+}
+
+
+
+
+
+.display-none { 
+  display: none;
+}
+
+.pre-monospace {
+  font-family: monospace;
+  margin: 6px;
+}
+
+.std-p {
+  font-size: 12px;
+  color: #228;
+  margin: 0px 2px;
+  padding: 0px;
+  font-weight: bold;
+}
+
+.std-win {
+  background: #fff;
+  border: 2px solid #222;
+  border-radius: 6px;
+  margin: 2px;
+  padding: 0px;
+  float: left;
+}
+.std-item {
+  background: #fff;
+  color: #222;
+  border: #ddd 1px solid;
+  border-radius: 6px;
+  margin: 2px 0px;
+  padding: 0px;
+}
+.std-item-header {
+  background: #222;
+  color: #eee;
+  border: #999 0px solid;
+  border-radius: 0px;
+  margin: 0px;
+  padding: 4px;
+  font-size: 14px;
+  cursor: pointer;
+}
+.std-item-header-small {
+  background: #eee;
+  border: #999 0px solid;
+  border-radius: 4px;
+  margin: 0px;
+  padding: 2px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.std-item-header-small-green {
+  background: #49cc90;
+  color: #fff;
+  border: #999 0px solid;
+  border-radius: 4px;
+  margin: 0px;
+  padding: 2px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.std-item-header-small-blue {
+  background: rgba(46, 224, 70, 0.3);
+  border: #999 0px solid;
+  border-radius: 4px;
+  margin: 0px;
+  padding: 2px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.std-item-menu {
+  margin: 2px 0px;
+  padding: 2px;
+}
+
+.scroll-600 {
+  max-height: 660px;
+  overflow: auto;
+}
+
+.std-bttn {
+  cursor: pointer;
+  font-size: 14px;
+  background: #F5F5F5;
+}
+
+.get-bttn {
+  cursor: pointer;
+  font-size: 14px;
+  background: #61affe;
+  color: #fff;
+  border: 0px;
+}
+
+.add-bttn {
+  cursor: pointer;
+  font-size: 14px;
+  background: #49cc90;
+  color: #fff;
+  border: 0px;
+}
+
+.del-bttn {
+  cursor: pointer;
+  font-size: 14px;
+  background: #f93e3e;
+  color: #fff;
+  border: 0px;
+}
+
+.mod-bttn {
+  cursor: pointer;
+  font-size: 14px;
+  background: #fca130;
+  color: #fff;
+  border: 0px;
+}
+
+.gray-bttn {
+  font-size: 14px;
+  background: #dddddd;
+  color: #fff;
+  border: 0px;
+}
+
+.cursor {
+  cursor: move;
+}
+
+.checkbox-big {
+  width: 50px;
+  height: 50px;
+  background: #333;
+}

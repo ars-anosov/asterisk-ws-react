@@ -135,15 +135,6 @@ npm install -g npm-check-updates
 
 # Для тестирования WebSocket
 npm install -g wscat
-
-# Для заливки на удаленные серверы используем утилиту Rsync
-apt update
-apt install rsync
-
-# публичный SSH-ключ этого контейнера вписываем на каждую удаленную машину в authorized_keys
-ssh-keygen
-scp /root/.ssh/id_rsa.pub ars@192.168.28.18:~/
-ssh -t ars@192.168.28.18 'cat id_rsa.pub >> ~/.ssh/authorized_keys'
 ```
 
 # 2.1. Backend
@@ -211,22 +202,25 @@ wscat -c "ws://192.168.13.97:8019"
 # 2.2. Frontend
 
 ## Обзор
-Компиляция JS библиотеки для браузера в директорию ***node_back/build_front***
+Компиляция JS библиотеки для браузера в директорию ***web_front/build***
 
 ## Установка
 Мы все еще в контейнере. Директория ***web_front***
 ```bash
 cd /asterisk-ws-react/web_front
 
-# Проверить обновления
+# обновляемся в package.json
 ncu
-cd src/js/components
-ncu
-cd /asterisk-ws-react/web_front
-
-# Особенности Babel читаем тут https://babeljs.io/docs/en/next/v7-migration
+ncu -a
+# чистим package.json от лишних пресетов Babel, если что-то поменялось в их политике - https://babeljs.io/docs/en/next/v7-migration
 npx babel-upgrade
 
+cd src/js/components
+ncu
+ncu -a
+
+# устанавливаем
+cd /asterisk-ws-react/web_front
 npm install
 npm run install-components
 ```
@@ -269,4 +263,42 @@ sed -i -e 's/"version": "2.0.1"/"version": "2.0.2"/' package.json
 
 npm login
 npm publish
+```
+
+
+
+
+
+
+
+
+
+# 3. Deploy
+
+## Обзор
+Размещаем сервисы на Production машину с помощью rsync.
+
+## Установка
+Мы все еще в контейнере
+```bash
+apt update
+apt install rsync
+
+ssh-keygen
+
+# публичный SSH-ключ этого контейнера вписываем на каждую удаленную машину в authorized_keys
+scp /root/.ssh/id_rsa.pub ars@192.168.28.18:~/
+ssh -t ars@192.168.28.18 'cat id_rsa.pub >> ~/.ssh/authorized_keys'
+```
+
+## Deploy
+Директория ***asterisk-ws-react***
+```bash
+cd asterisk-ws-react
+
+# Backend
+gulp reactor:deploy
+
+# Frontend
+gulp build:deploy
 ```

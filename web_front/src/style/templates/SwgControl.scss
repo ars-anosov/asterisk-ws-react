@@ -1,0 +1,32 @@
+.swgcontrol-win {
+  position: absolute;
+  top: 12px;
+  left: 100%;
+  margin: 0;
+  margin-right: -50%;
+  transform: translate(-100%, -50%);
+}
+
+
+
+
+.swg-ok {
+  width: 50px;
+  background: #49cc90;
+  color: #fff;
+  border: 0px;
+}
+
+.swg-try {
+  width: 50px;
+  background: #fca130;
+  color: #fff;
+  border: 0px;
+}
+
+.swg-err {
+  width: 50px;
+  background: #f93e3e;
+  color: #fff;
+  border: 0px;
+}
