@@ -6,7 +6,7 @@ const mysqlTools  = require('../sub_modules/mysql_tools')
 exports.apiAction = function(req, res, next) {
 
   const args      = req.swagger.params
-/*
+
   let qStr = "SELECT"+
   "   id,"+
   "   level,"+
@@ -18,7 +18,7 @@ exports.apiAction = function(req, res, next) {
   "   pass = '"+args.auth_pass.value+"'"
 
   mysqlTools.mysqlAction(
-    req.myObj.mysqlPoolAP,
+    req.mysqlPoolAP,
     qStr,
     // sql result ---
     (result) => {
@@ -46,7 +46,7 @@ exports.apiAction = function(req, res, next) {
         "   id = '"+authStatus.id+"'"
 
         mysqlTools.mysqlAction(
-          req.myObj.mysqlPoolAP,
+          req.mysqlPoolAP,
           qStr,
           (result) => {
             if (result.changedRows > 0) {
@@ -68,6 +68,5 @@ exports.apiAction = function(req, res, next) {
     }
     // sql result ---
   )
-*/
-  apiTools.apiResJson(res, {'code': 202, 'message': 'Пароль не подходит'}, 202)
+
 }

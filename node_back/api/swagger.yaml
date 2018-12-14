@@ -12,6 +12,7 @@ info:
     - Транслирует AMI events Asterisk по WebSocket в React компоненты
     
     Тест WebSocket - [ws_test](/ws_test)
+    Готовый Frontend - [front_build](/front_build)
 
 ################################################################################
 #                  Host, Base Path, Schemes and Content Types                  #

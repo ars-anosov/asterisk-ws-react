@@ -9,7 +9,7 @@ gulp -v
 const gulp            = require('gulp')
 const rimraf          = require('rimraf')
 const gulpif          = require('gulp-if')
-//const gutil           = require('gulp-util')  // This module has been deprecated
+const args            = require('yargs').argv
 
 // web-front ----------------------------------------------
 const prefixer        = require('gulp-autoprefixer')
@@ -25,11 +25,11 @@ const buffer          = require('vinyl-buffer')
 
 // built flags --------------------------------------------
 var buildFlag = {
-  //production: gutil.env.production ? true : false,
-  //sourcemap:  gutil.env.sourcemap ? true : false
-  production: false,
-  sourcemap:  false
+  production: args.production ? true : false,
+  sourcemap:  args.sourcemap ? true : false
 }
+console.log('args:')
+console.log(buildFlag)
 
 if (buildFlag.production) { process.env.NODE_ENV = 'production'; }
 

@@ -17,12 +17,23 @@ const amiUser     = process.argv[4]
 const amiSecret   = process.argv[5]
 const openApiPort = process.argv[6]
 const wsPort      = process.argv[7]
+const dbHost      = process.argv[8]
+const dbUser      = process.argv[9]
+const dbPass      = process.argv[10]
 
 const namiConfig = {
   'host':     amiHost,
   'port':     amiPort,
   'username': amiUser,
   'secret':   amiSecret
+}
+
+const mysqlConfigAP = {
+  connectionLimit : 3,
+  host     : dbHost,
+  user     : dbUser,
+  password : dbPass,
+  database : 'asterisk_ws'
 }
 
 // fs
@@ -43,10 +54,12 @@ const log4js    = require('log4js')
 
 const aaa_handle    = require('./sub_modules/aaa_handle')
 const namiTools     = require('./sub_modules/nami_tools')
+const mysqlTools    = require('./sub_modules/mysql_tools')
 const wsTools       = require('./sub_modules/ws_tools')
 
 // Глобальный объект, будет асинхронно мутировать:
 var nami                = {}
+var mysqlPoolAP         = {}
 var coreShowChannelsObj = []
 var wsServer            = {}
 const localDb           = {
@@ -71,8 +84,10 @@ namiConfig.logger.level = 'error'
 console.log('|------------------|')
 console.log('|\x1b[36m Start ARGUMENTS \x1b[0m|')
 console.log('|------------------|')
-console.log('amiConfig:')
+console.log('namiConfig:')
 console.log(namiConfig)
+console.log('mysqlConfigAP:')
+console.log(mysqlConfigAP)
 console.log('localDb:')
 console.log(localDb)
 console.log()
@@ -125,6 +140,35 @@ nami.on('namiEvent', (data) => {
 
 nami.open()
 // NAMI end ----
+
+
+
+
+
+
+
+
+
+// |--------------|
+// |     MySQL    |
+// |--------------|
+var mysql = require('mysql')
+
+// Мутирую глобальную переменную
+mysqlPoolAP = mysql.createPool(mysqlConfigAP)
+
+mysqlTools.mysqlAction(
+  mysqlPoolAP,
+  "SHOW GLOBAL VARIABLES LIKE 'version%'",
+  function(result) {
+    console.log('|--------------|')
+    console.log('|\x1b[36m DB connected \x1b[0m|')
+    console.log('|--------------|')
+    result.map((row) => {
+      console.log('  '+row.Variable_name+': '+row.Value)
+    })
+  }
+)
 
 
 
@@ -225,6 +269,7 @@ var httpStaticFiles = function (req, res, next) {
 // Наполнение req.localDb мутирующим глобальным объектом localDb
 var connectMyModules = function(req, res, next) {
   req['nami']                 = nami
+  req['mysqlPoolAP']          = mysqlPoolAP
   req['coreShowChannelsObj']  = coreShowChannelsObj
   req['wsServer']             = wsServer
   req['localDb']              = localDb
@@ -248,10 +293,12 @@ var eAppSwg = express()
 
 eAppSwg.get('/', (req, res) => res.send('Answer to the Ultimate Question of Life, the Universe, and Everything\n'))
 
-const htmlContentWsTest = fs.readFileSync('./ws_test.html', 'utf8')
-eAppSwg.get('/ws_test', (req, res) => res.send(htmlContentWsTest))
-
 swaggerTools.initializeMiddleware(swaggerDoc, function (middleware) {
+
+  // Моя статика
+  eAppSwg.use('/ws_test',       express.static(path.join(__dirname, 'ws_test')))
+  eAppSwg.use('/front_build',   express.static(path.join(__dirname, '../web_front/build')))
+
   // Работаю с модулем swaggerTools (объект middleware) =============
   // https://github.com/apigee-127/swagger-tools/blob/master/docs/Middleware.md
 

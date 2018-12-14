@@ -15,6 +15,18 @@ var apiResJson = function (res, resObj, statusCode) {
 
 
 
+/** Генератор случайной строки
+ * @param {int} n длинна строки
+ */
+var randWDclassic = function (n) {
+  var s ='', abd ='abcdefghijklmnopqrstuvwxyz0123456789', aL = abd.length;
+  while(s.length < n)
+    s += abd[Math.random() * aL|0];
+  return s;
+}
+
+
+
 
 
 
@@ -22,3 +34,4 @@ var apiResJson = function (res, resObj, statusCode) {
 
 
 module.exports.apiResJson     = apiResJson
+module.exports.randWDclassic  = randWDclassic

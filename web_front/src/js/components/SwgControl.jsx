@@ -5,16 +5,15 @@ export class SwgControl extends React.Component {
   constructor(args){
     super(args)
 
-    // Контейнер App наполняет this.props.swgConnect функцией из swgControlActions
-    // В результате выполнения this.props.swgConnect() контейнер App наполняет ---> this.props.swgClient для этой компоненты и других компонент
-    this.props.swgConnectAct(this.props.specUrl)
-
+    this.props.swgControlActions.swgConnectAct(this.props.specUrl)
+/*
     setInterval(
       () => {
-        this.props.swgConnectAct(this.props.specUrl)
+        this.props.swgControlActions.swgConnectAct(this.props.specUrl)
       },
       10000
     )
+*/
   }
 
 

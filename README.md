@@ -23,6 +23,8 @@
 
 
 # 1. MySQL-Server (контейнер mysql-server)
+Для работы сервиса нужна база данных. Разворачиваю в контейнере.
+
 База данных содержит
 - AAA таблицы для авторизации, аутентификации, аккаунтинга
 
@@ -89,8 +91,6 @@ mysql -uadmin -padminpass asterisk_ws < /mnt/mysql_aster_ws/structure_and_data.s
 
 
 # 2. Среда разработки back/front (контейнер node)
-
-## Окружение
 Работал в следующем окружении:
 <AMI-host> <AMI-port> <AMI-user> <AMI-secret> <OpenAPI-port>
 - **asterisk-ws-react** - Docker-контейнер NodeJS v.10
@@ -98,8 +98,8 @@ mysql -uadmin -padminpass asterisk_ws < /mnt/mysql_aster_ws/structure_and_data.s
 - **AMI_PORT** - Asterisk AMI Port
 - **AMI_USER** - Asterisk AMI User
 - **AMI_SECRET** - Asterisk AMI Secret
-- **OPENAPI_PORT=8018** - http порт на Pruduction машине для OpenAPI запросов к сервису
-- **WS_PORT=8019** - WebSocket порт на Pruduction машине
+- **OPENAPI_PORT=8018** - REST API порт Back-сервера
+- **WS_PORT=8019** - WebSocket порт Back-сервера
 - **DB_HOST** - MySQL сервер IP
 - **DB_USER** - MySQL user
 - **DB_PASS** - MySQL password
@@ -137,9 +137,15 @@ npm install -g npm-check-updates
 npm install -g wscat
 ```
 
-# 2.1. Backend
 
-## Обзор
+
+
+
+
+
+
+
+# 2.1. Backend
 OpenAPI-сервер обрабатывает REST-запросы, воздействует на Asterisk. WebSocket-сервер транслирует Asterisk events, дополняет их smart-данными о звонке (берет из базы абонентов).
 
 ## Установка
@@ -200,8 +206,6 @@ wscat -c "ws://192.168.13.97:8019"
 
 
 # 2.2. Frontend
-
-## Обзор
 Компиляция JS библиотеки для браузера в директорию ***web_front/build***
 
 ## Установка
@@ -212,7 +216,8 @@ cd /asterisk-ws-react/web_front
 # обновляемся в package.json
 ncu
 ncu -a
-# чистим package.json от лишних пресетов Babel, если что-то поменялось в их политике - https://babeljs.io/docs/en/next/v7-migration
+# чистим package.json от лишних пресетов Babel
+# https://babeljs.io/docs/en/next/v7-migration
 npx babel-upgrade
 
 cd src/js/components
@@ -238,33 +243,6 @@ gulp --production
 
 обновляем руками: ***Ctrl+Shift+R***
 
----
-<sub>После перехода на Babel 7 отказалась работать связка "vinyl-buffer@1.0.1"-"gulp-uglify@3.0.1" :( Временно решил с помощью "gulp-uglifyes@0.1.3", слежу за обновлениями "gulp-uglify@3.x"</sub>
-
-
-
-## asterisk-ws-react-components
-Пилим компоненты тут - [src/js/components](https://github.com/ars-anosov/asterisk-ws-react/blob/master/web-front/src/js/components)
-
-### npm publish
-Прогоняем через Babel
-
-```bash
-cd src/js/components
-
-gulp clean
-gulp
-```
-
-Публикуем на [npmjs.org](https://www.npmjs.com/package/asterisk-ws-react-component)
-```bash
-grep version package.json
-sed -i -e 's/"version": "2.0.1"/"version": "2.0.2"/' package.json
-
-npm login
-npm publish
-```
-
 
 
 
@@ -274,8 +252,6 @@ npm publish
 
 
 # 3. Deploy
-
-## Обзор
 Размещаем сервисы на Production машину с помощью rsync.
 
 ## Установка
@@ -301,4 +277,34 @@ gulp reactor:deploy
 
 # Frontend
 gulp build:deploy
+```
+
+
+
+
+
+
+
+
+
+# 4. asterisk-ws-react-components
+Компиляция React-компонент в отдельную NPM-библиотеку
+
+### Компилируем
+Мы все еще в контейнере. Директории ***[src/js/components](https://github.com/ars-anosov/asterisk-ws-react/tree/master/web_front/src/js/components)***
+```bash
+cd src/js/components
+
+gulp clean
+gulp
+```
+
+### Публикуем на [npmjs.org](https://www.npmjs.com/package/asterisk-ws-react-component)
+
+```bash
+grep version package.json
+sed -i -e 's/"version": "2.0.1"/"version": "2.0.2"/' package.json
+
+npm login
+npm publish
 ```
