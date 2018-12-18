@@ -291,9 +291,9 @@ gulp build:deploy
 Компиляция React-компонент в отдельную NPM-библиотеку
 
 ### Компилируем
-Мы все еще в контейнере. Директории ***[src/js/components](https://github.com/ars-anosov/asterisk-ws-react/tree/master/web_front/src/js/components)***
+Мы все еще в контейнере. Директория ***[web_front/src/js/components](https://github.com/ars-anosov/asterisk-ws-react/tree/master/web_front/src/js/components)***
 ```bash
-cd src/js/components
+cd web_front/src/js/components
 
 gulp clean
 gulp

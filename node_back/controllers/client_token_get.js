@@ -9,8 +9,7 @@ exports.apiAction = function(req, res, next) {
 
   let qStr = "SELECT"+
   "   id,"+
-  "   level,"+
-  "   fio"+
+  "   level"+
   " FROM"+
   "   user"+
   " WHERE"+
@@ -22,18 +21,10 @@ exports.apiAction = function(req, res, next) {
     qStr,
     // sql result ---
     (result) => {
-
-      let authStatus  = {}
-      // map ---
-      result.map((row, i) => {
-        authStatus.id     = row.id
-        authStatus.level  = row.level
-        authStatus.fio    = row.fio
-      })
-      // map ---
+      let authStatus  = result[0]
 
       // response ---
-      if (authStatus.level) {
+      if (authStatus && authStatus.level) {
         // клиент ввел правильный пароль и level пользователя не 0
         let token_new  = apiTools.randWDclassic(30)
         
@@ -50,7 +41,7 @@ exports.apiAction = function(req, res, next) {
           qStr,
           (result) => {
             if (result.changedRows > 0) {
-              apiTools.apiResJson(res, {'token': token_new, 'fio': authStatus.fio}, 200)
+              apiTools.apiResJson(res, {'token': token_new, info: {'level': authStatus.level}}, 200)
             }
             else {
               apiTools.apiResJson(res, {'code': 202, 'message': 'token не обновился в БД'}, 202)

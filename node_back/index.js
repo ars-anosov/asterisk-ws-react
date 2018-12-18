@@ -273,6 +273,7 @@ var connectMyModules = function(req, res, next) {
   req['coreShowChannelsObj']  = coreShowChannelsObj
   req['wsServer']             = wsServer
   req['localDb']              = localDb
+  req['aaa']                  = {'authentication':{}, 'authorization':{}, 'accounting':{}}
   next()
 }
 

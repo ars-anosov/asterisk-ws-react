@@ -72,6 +72,35 @@ paths:
       x-swagger-router-controller: Client
     x-swagger-router-controller: Client
 
+  /client/user:
+    get:
+      tags:
+        - Client
+      summary: Получить профиль пользователя
+      description: Получаем профиль
+      operationId: user_get
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: token
+          in: header
+          description: token
+          required: true
+          type: string
+      responses:
+        200:
+          description: user info
+          schema:
+            $ref: '#/definitions/client_user_get'
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/errorModel'
+      x-swagger-router-controller: Client
+    x-swagger-router-controller: Client
+
 ################################################################################
 #                                 Definitions                                  #
 ################################################################################
@@ -79,32 +108,35 @@ definitions:
 
 # client_token_get ------------------------------------------------------------
   client_token_get:
-    type: "object"
+    type: object
     properties:
       token:
-        type: "string"
-      fio:
-        type: "string"
+        type: string
+      info:
+        type: object
 
+# client_user_get -------------------------------------------------------------
+  client_user_get:
+    type: object
 
 # system ----------------------------------------------------------------------
   dummy:
-    type: "object"
+    type: object
     properties:
       code:
-        type: "integer"
-        format: "int32"
+        type: integer
+        format: int32
       message:
-        type: "string"
+        type: string
 
   errorModel:
-    type: "object"
+    type: object
     required:
     - "code"
     - "message"
     properties:
       code:
-        type: "integer"
-        format: "int32"
+        type: integer
+        format: int32
       message:
-        type: "string"
+        type: string
