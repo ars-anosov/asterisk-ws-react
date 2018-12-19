@@ -80,7 +80,7 @@ mysqldump -uadmin -padminpass asterisk_ws > /mnt/mysql_aster_ws/structure_and_da
 # restore
 mysql -uadmin -padminpass asterisk_ws < /mnt/mysql_aster_ws/structure_and_data.sql
 ```
-выйти Ctrl+D
+выходим из bash контейнера ***Ctrl+D***
 
 
 
@@ -94,6 +94,7 @@ mysql -uadmin -padminpass asterisk_ws < /mnt/mysql_aster_ws/structure_and_data.s
 Работал в следующем окружении:
 <AMI-host> <AMI-port> <AMI-user> <AMI-secret> <OpenAPI-port>
 - **asterisk-ws-react** - Docker-контейнер NodeJS v.10
+- **9229** - TCP Port для Node Debug
 - **AMI_HOST** - Asterisk IP
 - **AMI_PORT** - Asterisk AMI Port
 - **AMI_USER** - Asterisk AMI User
@@ -118,11 +119,12 @@ sudo docker run \
   -e "OPENAPI_PORT=8018" -e "WS_PORT=8019" \
   -e "DB_HOST=mysql-local-3306" -e "DB_USER=admin" -e "DB_PASS=adminpass" \
   -p 8018:8018 -p 8019:8019 \
+  -p 9229:9229 \
   -it \
   node:10 bash
 ```
 
-Дальше все действия внутри контейнера. Выскочить из контейнера : Ctrl+P+Q.
+Дальше все действия внутри контейнера
 ```bash
 # Таскер (в нем же и компилирую ES6) https://github.com/gulpjs/gulp
 npm install -g gulp-cli
@@ -136,6 +138,7 @@ npm install -g npm-check-updates
 # Для тестирования WebSocket
 npm install -g wscat
 ```
+Выскочить из контейнера : ***Ctrl+P+Q***
 
 
 
@@ -149,8 +152,9 @@ npm install -g wscat
 OpenAPI-сервер обрабатывает REST-запросы, воздействует на Asterisk. WebSocket-сервер транслирует Asterisk events, дополняет их smart-данными о звонке (берет из базы абонентов).
 
 ## Установка
-Мы все еще в контейнере. Директория ***node_back***
+Директория ***node_back***
 ```bash
+sudo docker exec -it asterisk-ws-react bash
 cd /asterisk-ws-react/node_back
 
 # Проверить обновления
@@ -176,13 +180,17 @@ host: '10.229.x.x:8018'
 ## Запуск
 ```bash
 pm2 start index.js \
-  --name back --watch ./controllers --restart-delay 60000 \
+  --name back --watch ./controllers --restart-delay 1000 --node-args="--inspect=0.0.0.0:9229" \
   -- $AMI_HOST $AMI_PORT $AMI_USER $AMI_SECRET $OPENAPI_PORT $WS_PORT $DB_HOST $DB_USER $DB_PASS
 pm2 logs back
 
 # либо без посредников, с отладкой в консоль
-node index.js $AMI_HOST $AMI_PORT $AMI_USER $AMI_SECRET $OPENAPI_PORT $WS_PORT $DB_HOST $DB_USER $DB_PASS
+node --inspect=0.0.0.0:9229 index.js \
+  $AMI_HOST $AMI_PORT $AMI_USER $AMI_SECRET $OPENAPI_PORT $WS_PORT $DB_HOST $DB_USER $DB_PASS
 ```
+выходим из bash контейнера ***Ctrl+D***
+
+С этого места Backend работает, перезагружает сервис при изменении файлов в ./controllers.
 
 ### Проверки
 - WEB-интерфейс для тестовых запросов через **Swagger-UI** - [192.168.13.97:8018/spec-ui/](http://192.168.13.97:8018/spec-ui/)
@@ -196,6 +204,7 @@ curl -X GET -H "accept: application/json" \
 ```bash
 wscat -c "ws://192.168.13.97:8019"
 ```
+- **chrome://inspect** - Discover network targets -> Configure: 192.168.13.97:9229
 
 
 
@@ -209,8 +218,9 @@ wscat -c "ws://192.168.13.97:8019"
 Компиляция JS библиотеки для браузера в директорию ***web_front/build***
 
 ## Установка
-Мы все еще в контейнере. Директория ***web_front***
+Директория ***web_front***
 ```bash
+sudo docker exec -it asterisk-ws-react bash
 cd /asterisk-ws-react/web_front
 
 # обновляемся в package.json
@@ -233,12 +243,15 @@ npm run install-components
 ## Запуск
 Компилируем build
 ```bash
+cd /asterisk-ws-react/web_front
 gulp
 # production build
 gulp --production
 ```
 
 ### Результат
+С этого места Frontend компилирует build при изменении файлов в gulp.watch
+
 Готовый build - [http://192.168.13.97:8018/build_front](http://192.168.13.97:8018/build_front)
 
 обновляем руками: ***Ctrl+Shift+R***
