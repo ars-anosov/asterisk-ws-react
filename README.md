@@ -31,39 +31,44 @@
 ## Установка
 Docker [doc](https://github.com/mysql/mysql-docker)
 
-Если контейнер с MySQL-сервером уже существует, и надо дополнить его дополнительным **vulume** - создаем с нуля:
-- делаем backup данных в предыдущих проектах
-- удаляем/пересоздаем контейнер
-
-Хостовая машина, директория ***asterisk-ws-react***
+Мой контейнер был установлен и связан с хостовой директорией ***~/share/mysql***
 ```bash
-cd asterisk-ws-react
+mkdir -p ~/share/mysql
 
 sudo docker run \
-  --name mysql-local-3306 \
+  --name mysql-57 \
   -d \
   -p 3306:3306 -p 33060:33060 \
-  -v $PWD/mysql:/mnt/mysql_aster_ws \
-  -v /other/projects/mysql:/mnt/mysql_other_data \
+  -v ~/share/mysql:/mnt/mysql \
   mysql/mysql-server:5.7
 
 # смотрим пароль root
-sudo docker logs mysql-local-3306 2>&1 | grep GENERATED
+sudo docker logs mysql-57 2>&1 | grep GENERATED
 # работаем с базой
-sudo docker exec -it mysql-local-3306 mysql -uroot -p
+sudo docker exec -it mysql-57 mysql -uroot -p
 ```
 
-Меняем праоль у root, делаем пользователя admin для входа с любых IP.
+Меняем праоль у root, делаем пользователя ***admin*** для входа с любых IP.
 ```sql
 ALTER USER 'root'@'localhost' IDENTIFIED BY 'rootpass';
 CREATE USER 'admin'@'%' IDENTIFIED BY 'adminpass';
 GRANT ALL PRIVILEGES ON *.* TO 'admin'@'%';
 FLUSH PRIVILEGES;
 SELECT User, Host FROM mysql.user;
+```
+выходим из bash контейнера ***Ctrl+D***
 
-CREATE DATABASE `asterisk_ws` DEFAULT CHARACTER SET utf8;
+Создаем базу ***asterisk-ws-react***
+```bash
+sudo docker exec -it mysql-57 bash
+  mysql -uadmin -padminpass
+```
+
+```sql
+CREATE DATABASE `asterisk-ws-react` DEFAULT CHARACTER SET utf8;
 SHOW DATABASES;
 ```
+
 
 В **MySql Workbench 8.0** возникнут проблемы import/export при работе с сервером версии 5.7. Нужен подходящий **mysqldump.exe**:
 - Качаем [MySQL Community Server 5.7](https://dev.mysql.com/downloads/mysql/) - выкавыриваем из архива mysqldump.exe
@@ -72,16 +77,25 @@ SHOW DATABASES;
 выложил у себя [mysqldump-5-7-24.exe](https://github.com/ars-anosov/asterisk-ws-react/blob/master/mysql/)
 
 ## backup/restore
+В контейнере mysql-57 создаем директорию под проект asterisk-ws-react
+```
+mkdir -p ~/share/mysql/asterisk-ws-react
+```
+
+Хостовая машина, директория ***asterisk-ws-react***
 ```bash
-sudo docker exec -it mysql-local-3306 bash
+cd asterisk-ws-react
 
 # backup
-mysqldump -uadmin -padminpass asterisk_ws > /mnt/mysql_aster_ws/structure_and_data.sql
-# restore
-mysql -uadmin -padminpass asterisk_ws < /mnt/mysql_aster_ws/structure_and_data.sql
-```
-выходим из bash контейнера ***Ctrl+D***
+sudo docker exec -it mysql-57 bash
+  mysqldump -uadmin -padminpass asterisk-ws-react > /mnt/mysql/asterisk-ws-react/structure_and_data.sql
+cp ~/share/mysql/asterisk-ws-react/*.sql mysql/
 
+# restore
+sudo cp mysql/*.sql ~/share/mysql/asterisk-ws-react/
+sudo docker exec -it mysql-57 bash
+  mysql -uadmin -padminpass asterisk-ws-react < /mnt/mysql/asterisk-ws-react/structure_and_data.sql
+```
 
 
 
@@ -123,9 +137,12 @@ sudo docker run \
   -it \
   node:10 bash
 ```
+Выскочить из контейнера : ***Ctrl+P+Q***
 
 Дальше все действия внутри контейнера
 ```bash
+sudo docker exec -it asterisk-ws-react bash
+
 # Таскер (в нем же и компилирую ES6) https://github.com/gulpjs/gulp
 npm install -g gulp-cli
 
@@ -168,13 +185,17 @@ npm install
 ### Локальные правки
 Если разворачиваем на **production** сервере, например **10.229.x.x**
 1. Правим поле ***host*** в [node-back/api/swagger.yaml](https://github.com/ars-anosov/asterisk-ws-react/blob/master/node_back/api/swagger.yaml)
-```yaml
-host: '10.229.x.x:8018'
+```bash
+sed -i -e "s/host: '192.168.13.97:8018'/host: '10.229.x.x:8018'/" api/swagger.yaml
 ```
-2. Правим ***localStorage*** параметры готового build в [index.html](https://github.com/ars-anosov/asterisk-ws-react/blob/master/node-back/build_front/index.html)
+2. Правим ***localStorage[specUrl, wsUrl]*** готового build в [index.html](https://github.com/ars-anosov/asterisk-ws-react/blob/master/node-back/build_front/index.html)
 ```JavaScript
     window.localStorage.setItem('specUrl',  'http://10.229.x.x:8018/spec/swagger.json')
     window.localStorage.setItem('wsUrl',    'ws://10.229.x.x:8019')
+```
+```bash
+sed -i -e "s/'http:\/\/192.168.13.97:8018\/spec\/swagger.json'/'http:\/\/10.229.x.x:8018\/spec\/swagger.json'/" ../web_front/build/index.html
+sed -i -e "s/'ws:\/\/192.168.13.97:8019'/'ws:\/\/10.229.x.x:8019'/" ../web_front/build/index.html
 ```
 
 ## Запуск
@@ -252,7 +273,7 @@ gulp --production
 ### Результат
 С этого места Frontend компилирует build при изменении файлов в gulp.watch
 
-Готовый build - [http://192.168.13.97:8018/build_front](http://192.168.13.97:8018/build_front)
+Готовый build - [http://192.168.13.97:8018/front_build/](http://192.168.13.97:8018/front_build/)
 
 обновляем руками: ***Ctrl+Shift+R***
 
