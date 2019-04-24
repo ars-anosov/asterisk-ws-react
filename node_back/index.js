@@ -33,7 +33,7 @@ const mysqlConfigAP = {
   host     : dbHost,
   user     : dbUser,
   password : dbPass,
-  database : 'asterisk_ws'
+  database : 'asterisk-ws'
 }
 
 // fs
@@ -63,7 +63,8 @@ var mysqlPoolAP         = {}
 var coreShowChannelsObj = []
 var wsServer            = {}
 const localDb           = {
-  'info': 'local base for Asterisk-WS-React',
+  'info'        : 'local base for Asterisk-WS-React',
+  'apiUrl'      : 'take it from swaggerDoc const later',
 }
 
 // loggers
@@ -222,6 +223,7 @@ const options       = {
 }
 const spec          = fs.readFileSync(path.join(__dirname,'api/swagger.yaml'), 'utf8');
 const swaggerDoc    = jsyaml.safeLoad(spec)
+localDb.apiUrl      = 'http://'+swaggerDoc.host
 
 // [!!! middleware !!!] [!!! middleware !!!] [!!! middleware !!!] -------------
 
@@ -345,7 +347,7 @@ swaggerTools.initializeMiddleware(swaggerDoc, function (middleware) {
     console.log('|------------------------------------|')
     console.log('|\x1b[36m Asterisk WebSocket REACTOR started \x1b[0m|')
     console.log('|------------------------------------|')
-    console.log('  Swagger-UI: http://192.168.13.97:'+openApiPort+'/spec-ui/')
+    console.log('  Swagger-UI: '+localDb.apiUrl+'/spec-ui/')
     console.log()
     console.log()
   })

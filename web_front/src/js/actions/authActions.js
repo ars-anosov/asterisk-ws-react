@@ -1,22 +1,27 @@
 import {
   AUTH_TOKEN_DISPLAY_BLK,
+
   AUTH_TOKEN_GET_REQUEST,
   AUTH_TOKEN_GET_SUCCESS,
   AUTH_TOKEN_GET_202,
+
+  AUTH_USER_GET_REQUEST,
+  AUTH_USER_GET_SUCCESS,
+  AUTH_USER_GET_202,
 
   AUTH_DATA_USER_INPUT
 } from '../constants/authConst'
 
 
 
-export function authTokenAct(swgClient, authName, authPass) {
+function authTokenAct(swgClient, authName, authPass) {
   return (dispatch) => {
 
     if (authName && authPass) {
       // try
       dispatch({
         type: AUTH_TOKEN_GET_REQUEST,
-        payload: {'token': ''}
+        payload: {'token': '', 'message': 'Попытка авторизации...'}
       })
 
       // request
@@ -27,7 +32,7 @@ export function authTokenAct(swgClient, authName, authPass) {
           // token - Ok
           dispatch({
             type: AUTH_TOKEN_GET_SUCCESS,
-            payload: {'token': res.body.token, 'fio': res.body.fio}
+            payload: {'token': res.body.token, 'fio': res.body.fio, 'message': res.body.message}
           })
 
         }
@@ -36,7 +41,7 @@ export function authTokenAct(swgClient, authName, authPass) {
           // token - NOT Ok !
           dispatch({
             type: AUTH_TOKEN_GET_202,
-            payload: {'token': ''}
+            payload: {'token': '', 'message': res.body.message}
           })
 
         }
@@ -45,7 +50,7 @@ export function authTokenAct(swgClient, authName, authPass) {
         //console.log(err)
           dispatch({
             type: AUTH_TOKEN_GET_202,
-            payload: {'token': ''}
+            payload: {'token': '', 'message': 'что-то пошло не так'}
           })
       })
     }
@@ -53,11 +58,77 @@ export function authTokenAct(swgClient, authName, authPass) {
   }
 }
 
-export function handleChangeData(event) {
+
+
+function clientUserDataGet(swgClient, token) {
+  //console.log(swgClient)
+  return (dispatch) => {
+
+    if (swgClient && swgClient.apis && token) {
+      // try
+      dispatch({
+        type: AUTH_USER_GET_REQUEST,
+        payload: {'data': {}}
+      })
+
+      // request
+      swgClient.apis.Client.user_get({
+        'token':  token
+      })
+      .then((res) => {
+        if (res.status == '200' && res.body) {
+          dispatch({
+            type: AUTH_USER_GET_SUCCESS,
+            payload: {'data': res.body}
+          })
+        }
+        if (res.status == '202' && res.body) {
+          dispatch({
+            type: AUTH_USER_GET_202,
+            payload: {'data': {}, 'message': res.body.message}
+          })
+          // show auth win
+          if (res.body.message === 'token Unauthorized') {
+            dispatch({
+              type: AUTH_TOKEN_DISPLAY_BLK,
+              payload: {'boolVal': true}
+            })
+          }
+        }
+      })
+      .catch((err) => {
+        //console.log(err)
+          dispatch({
+            type: AUTH_USER_GET_202,
+            payload: {'data': {}}
+          })
+      })
+    }
+
+  }
+}
+
+
+
+function handleChangeData(event) {
   return (dispatch) => {
     dispatch({
       type: AUTH_DATA_USER_INPUT,
-      payload: {'storeDataKey': event.target.getAttribute('store_data_key'), 'storeDataValue': event.target.value}
+      payload: {'storeDataKey': event.target.id, 'storeDataValue': event.target.value}
     })
   }
+}
+
+
+
+
+
+
+
+
+
+export {
+  authTokenAct,
+  clientUserDataGet,
+  handleChangeData,
 }

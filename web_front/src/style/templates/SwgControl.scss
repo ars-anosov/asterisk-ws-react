@@ -1,23 +1,31 @@
 .swgcontrol-win {
+  display: none;
   position: absolute;
-  top: 12px;
+  top: 10px;
   left: 100%;
-  margin: 0;
   margin-right: -50%;
   transform: translate(-100%, -50%);
+  background: rgba(224, 224, 224, 0.3);
+  color: #000;
+  border: 1px solid #fff;
+  border-radius: 6px;
+  padding: 2px;
+  font-size: 8px;
 }
 
 
 
 
 .swg-ok {
+  font-size: 8px;
   width: 50px;
-  background: #49cc90;
+  background: rgba(8, 248, 0, 0.3);
   color: #fff;
   border: 0px;
 }
 
 .swg-try {
+  font-size: 8px;
   width: 50px;
   background: #fca130;
   color: #fff;
@@ -25,6 +33,7 @@
 }
 
 .swg-err {
+  font-size: 8px;
   width: 50px;
   background: #f93e3e;
   color: #fff;

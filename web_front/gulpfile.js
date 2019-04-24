@@ -31,7 +31,7 @@ var buildFlag = {
 console.log('args:')
 console.log(buildFlag)
 
-if (buildFlag.production) { process.env.NODE_ENV = 'production'; }
+if (buildFlag.production) { process.env.NODE_ENV = 'production' }
 
 var path = {
     // html -----------------------------------------------

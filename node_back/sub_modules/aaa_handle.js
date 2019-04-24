@@ -1,16 +1,14 @@
 'use strict';
 
 const apiTools      = require('./api_tools')
-const mysqlTools  = require('./mysql_tools')
+const mysqlTools    = require('./mysql_tools')
 
 // Аутентификация по args.auth_name && args.auth_pass
 exports.checkAuth = function(req, res, next) {
 
   if (req.swagger) {
-    // Объекта swagger присутствует.
-    console.log('req.swagger.operationPath:')
-    console.log(req.swagger.operationPath)
-    var args              = req.swagger.params
+    // Объект swagger присутствует.
+    const args              = req.swagger.params
 
     if (args.auth_name && args.auth_pass) {
       // Прилетел запрос с 2-мя полями args.auth_name и args.auth_pass
@@ -26,14 +24,22 @@ exports.checkAuth = function(req, res, next) {
     else {
       // У клиента есть token. Провожу Аутентификацию.
       let qStr = "SELECT"+
-      "   id,"+
-      "   level,"+
-      "   fio,"+
-      "   exten"+
+      "   user.id                     AS id,"+
+      "   user.name                   AS name,"+
+      "   user.level                  AS level,"+
+      "   user.fio                    AS fio,"+
+      "   user_app.app_arr            AS app_arr,"+
+      "   user_exten.exten_arr        AS exten_arr"+
       " FROM"+
       "   user"+
+      " LEFT JOIN"+
+      "   user_app ON user.id=user_app.user_id"+
+      " LEFT JOIN"+
+      "   user_exten ON user.id=user_exten.user_id"+
       " WHERE"+
-      "   token = '"+args.token.value+"'"
+      "   user.token = '"+args.token.value+"'"
+
+      //console.log(qStr)
 
       mysqlTools.mysqlAction(
         req.mysqlPoolAP,
@@ -42,8 +48,8 @@ exports.checkAuth = function(req, res, next) {
         (result) => {
           req.aaa.authentication  = result[0]
           if (req.aaa.authentication && req.aaa.authentication.level > 0) {
-            //authorizeCmdLvl(req, res, next)   // проверяю API команду
-            next()                              // пропускаю любые API-команды
+            accountingCmd(req, res, next)       // Начинаю цепочку действий с логирования команд в базе
+            //next()                              // пропускаю любые API-команды
           }
           else {
             apiTools.apiResJson(res, {code: 202, message: 'token Unauthorized'}, 202)
@@ -69,8 +75,45 @@ exports.checkAuth = function(req, res, next) {
 
 
 
-// Авторизация уровня доступа к команде cmd:method по req.aaa.authentication.level
-function authorizeCmdLvl(req, res, next) {
+// Accounting действий cmd:method
+function accountingCmd(req, res, next) {
+  // прилетело обращение к cmd:method
+  const cmd     = req.swagger.operationPath[1]
+  const method  = req.swagger.operationPath[2]
+  const args    = req.swagger.params
+
+  console.log('[accountingCmd] '+req.aaa.authentication.name+' > '+cmd+':'+method)
+  if ( method === 'delete' || ((method === 'post' || method === 'put') && args.body) ) {
+    const qStr = "INSERT INTO user_log (user_id, cmd, method, text) VALUES"+
+    "   ("+req.aaa.authentication.id+","+
+    "   '"+cmd+"',"+
+    "   '"+method+"',"+
+    "   '"+JSON.stringify(args)+"')"
+
+    mysqlTools.mysqlAction(
+      req.mysqlPoolAP,
+      qStr,
+      (result) => {
+        //console.log(result)
+      }
+    )
+  }
+
+  //authenticateCmdLvl(req, res, next)   // Проверка уровня доступа к API команде
+  next()                              // Цепочка проверок закончена
+  
+}
+
+
+
+
+
+
+
+
+
+// Уровень доступа к команде cmd:method по req.aaa.authentication.level
+function authenticateCmdLvl(req, res, next) {
   // прилетело обращение к cmd:method
   let cmd     = req.swagger.operationPath[1]
   let method  = req.swagger.operationPath[2]

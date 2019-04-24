@@ -13,6 +13,7 @@ export default function configureStore(initialState) {
     rootReducer,
     initialState,
     applyMiddleware(thunk, logger)
+    //process.env.NODE_ENV === 'production' ? applyMiddleware(thunk) : applyMiddleware(thunk, logger)
     //applyMiddleware(ping)
   )
 

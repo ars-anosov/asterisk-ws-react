@@ -65,7 +65,7 @@ sudo docker exec -it mysql-57 bash
 ```
 
 ```sql
-CREATE DATABASE `asterisk-ws-react` DEFAULT CHARACTER SET utf8;
+CREATE DATABASE `asterisk-ws` DEFAULT CHARACTER SET utf8;
 SHOW DATABASES;
 ```
 
@@ -106,7 +106,6 @@ sudo docker exec -it mysql-57 bash
 
 # 2. Среда разработки back/front (контейнер node)
 Работал в следующем окружении:
-<AMI-host> <AMI-port> <AMI-user> <AMI-secret> <OpenAPI-port>
 - **asterisk-ws-react** - Docker-контейнер NodeJS v.10
 - **9229** - TCP Port для Node Debug
 - **AMI_HOST** - Asterisk IP
@@ -126,12 +125,12 @@ cd asterisk-ws-react
 
 sudo docker run \
   --name asterisk-ws-react \
-  --link mysql-local-3306:mysql-local-3306 \
+  --link mysql-57:mysql-57 \
   -v $PWD:/asterisk-ws-react \
   -w /asterisk-ws-react \
   -e "AMI_HOST=192.168.30.29" -e "AMI_PORT=5038" -e "AMI_USER=helpdesk" -e "AMI_SECRET=helpdeskadmin" \
   -e "OPENAPI_PORT=8018" -e "WS_PORT=8019" \
-  -e "DB_HOST=mysql-local-3306" -e "DB_USER=admin" -e "DB_PASS=adminpass" \
+  -e "DB_HOST=mysql-57" -e "DB_USER=admin" -e "DB_PASS=adminpass" \
   -p 8018:8018 -p 8019:8019 \
   -p 9229:9229 \
   -it \
@@ -155,7 +154,7 @@ npm install -g npm-check-updates
 # Для тестирования WebSocket
 npm install -g wscat
 ```
-Выскочить из контейнера : ***Ctrl+P+Q***
+Закончить bash-сессию в контейнере : ***Ctrl+D***
 
 
 
@@ -177,7 +176,7 @@ cd /asterisk-ws-react/node_back
 # Проверить обновления
 ncu
 # обновить package.json если хочется
-ncu -a
+ncu -u
 
 npm install
 ```
@@ -246,14 +245,14 @@ cd /asterisk-ws-react/web_front
 
 # обновляемся в package.json
 ncu
-ncu -a
+ncu -u
 # чистим package.json от лишних пресетов Babel
 # https://babeljs.io/docs/en/next/v7-migration
 npx babel-upgrade
 
 cd src/js/components
 ncu
-ncu -a
+ncu -u
 
 # устанавливаем
 cd /asterisk-ws-react/web_front
@@ -321,7 +320,7 @@ gulp build:deploy
 
 
 
-# 4. asterisk-ws-react-components
+# 4. asterisk-ws-react-component
 Компиляция React-компонент в отдельную NPM-библиотеку
 
 ### Компилируем

@@ -17,7 +17,7 @@ export default function swgControlRdcr(state = initialState, action) {
 
   switch (action.type) {
     case SWGCTL_CONNECT_REQUEST:
-      return { ...state, fetching: true, StatusTxt: 'try', StatusClass: 'swg-try' }
+      return { ...state, fetching: true, StatusTxt: 'Trying', StatusClass: 'swg-try' }
 
     case SWGCTL_CONNECT_SUCCESS:
       return { ...state, fetching: false, swgClient: action.payload.swgClient, StatusTxt: 'Ok', StatusClass: 'swg-ok' }
