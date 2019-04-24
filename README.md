@@ -88,13 +88,15 @@ cd asterisk-ws-react
 
 # backup
 sudo docker exec -it mysql-57 bash
-  mysqldump -uadmin -padminpass asterisk-ws-react > /mnt/mysql/asterisk-ws-react/structure_and_data.sql
+  mysqldump -uadmin -padminpass asterisk-ws > /mnt/mysql/asterisk-ws-react/structure_and_data.sql
+  [Ctrl+D]
 cp ~/share/mysql/asterisk-ws-react/*.sql mysql/
 
 # restore
 sudo cp mysql/*.sql ~/share/mysql/asterisk-ws-react/
 sudo docker exec -it mysql-57 bash
-  mysql -uadmin -padminpass asterisk-ws-react < /mnt/mysql/asterisk-ws-react/structure_and_data.sql
+  mysql -uadmin -padminpass asterisk-ws < /mnt/mysql/asterisk-ws-react/structure_and_data.sql
+  [Ctrl+D]
 ```
 
 
