@@ -29,6 +29,7 @@ exports.checkAuth = function(req, res, next) {
       "   user.level                  AS level,"+
       "   user.fio                    AS fio,"+
       "   user_app.app_arr            AS app_arr,"+
+      "   user.login_hd               AS login_hd,"+
       "   user_exten.exten_arr        AS exten_arr"+
       " FROM"+
       "   user"+

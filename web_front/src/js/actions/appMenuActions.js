@@ -2,7 +2,7 @@ import {
   MENU_DATA_USER_SELECT
 } from '../constants/appMenuConst'
 
-//import * as userManagerActions         from './userManagerActions' 
+import * as hdActions         from './hdActions' 
 
 
 
@@ -19,8 +19,8 @@ export function handleMenuSelect(event, swgClient) {
     // --------------------------------------------------------
     let token = window.localStorage.getItem('token')
     
-    if (event.target.innerText === 'Пользователь') {
-      //dispatch(userManagerActions.userInfoGet(swgClient, token))
+    if (event.target.innerText === 'HelpDesk') {
+      dispatch(hdActions.ttMyListGet(swgClient, token))
     }
 
   }

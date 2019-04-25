@@ -220,7 +220,7 @@ class AppMenuTop extends React.Component {
           {/* Эти названия проверяются в appMenuActions (первичное действие) */}
           <List>
             <ListItem button>
-              <ListItemText primary='Заявки' onClick={this.handleMenuSelect} />
+              <ListItemText primary='HelpDesk' onClick={this.handleMenuSelect} />
             </ListItem>
             <ListItem button>
               <ListItemText primary='Мой телефон' onClick={this.handleMenuSelect} />

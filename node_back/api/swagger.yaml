@@ -32,6 +32,9 @@ consumes:
 tags:
   - name: Client
     description: Авторизация в админке
+  - name: Hd
+    description: HelpDesk на vrf.intellin-tech.ru
+
 
 ################################################################################
 #                                    Paths                                     #
@@ -101,6 +104,35 @@ paths:
       x-swagger-router-controller: Client
     x-swagger-router-controller: Client
 
+  /hd/ttmy:
+    get:
+      tags:
+        - Hd
+      summary: Получить номера своих ТТ
+      description: Получаем ТТ
+      operationId: hd_ttmy_get
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: token
+          in: header
+          description: token
+          required: true
+          type: string
+      responses:
+        200:
+          description: ttmy
+          schema:
+            $ref: '#/definitions/hd_ttmy_get'
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/errorModel'
+      x-swagger-router-controller: Hd
+    x-swagger-router-controller: Hd
+
 ################################################################################
 #                                 Definitions                                  #
 ################################################################################
@@ -118,6 +150,12 @@ definitions:
 # client_user_get -------------------------------------------------------------
   client_user_get:
     type: object
+
+# hd_ttmy_get -------------------------------------------------------------------
+  hd_ttmy_get:
+    type: array
+    items:
+      type: object
 
 # system ----------------------------------------------------------------------
   dummy:

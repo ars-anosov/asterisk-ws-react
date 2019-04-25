@@ -35,6 +35,13 @@ const mysqlConfigAP = {
   password : dbPass,
   database : 'asterisk-ws'
 }
+const mysqlConfigHd = {
+  connectionLimit : 3,
+  host     : 'vrf.intellin-tech.ru',
+  user     : 'hduser',
+  password : 'arsadmin',
+  database : 'helpdesk'
+}
 
 // fs
 const fs          = require('fs')
@@ -60,6 +67,7 @@ const wsTools       = require('./sub_modules/ws_tools')
 // Глобальный объект, будет асинхронно мутировать:
 var nami                = {}
 var mysqlPoolAP         = {}
+var mysqlPoolHd         = {}
 var coreShowChannelsObj = []
 var wsServer            = {}
 const localDb           = {
@@ -89,6 +97,8 @@ console.log('namiConfig:')
 console.log(namiConfig)
 console.log('mysqlConfigAP:')
 console.log(mysqlConfigAP)
+console.log('mysqlConfigHd:')
+console.log(mysqlConfigHd)
 console.log('localDb:')
 console.log(localDb)
 console.log()
@@ -157,19 +167,10 @@ var mysql = require('mysql')
 
 // Мутирую глобальную переменную
 mysqlPoolAP = mysql.createPool(mysqlConfigAP)
+mysqlTools.mysqlCheckServer(mysqlPoolAP, 'AdminPage DB')
 
-mysqlTools.mysqlAction(
-  mysqlPoolAP,
-  "SHOW GLOBAL VARIABLES LIKE 'version%'",
-  function(result) {
-    console.log('|--------------|')
-    console.log('|\x1b[36m DB connected \x1b[0m|')
-    console.log('|--------------|')
-    result.map((row) => {
-      console.log('  '+row.Variable_name+': '+row.Value)
-    })
-  }
-)
+mysqlPoolHd = mysql.createPool(mysqlConfigHd)
+mysqlTools.mysqlCheckServer(mysqlPoolHd, 'HelpDesk DB')
 
 
 
@@ -272,6 +273,7 @@ var httpStaticFiles = function (req, res, next) {
 var connectMyModules = function(req, res, next) {
   req['nami']                 = nami
   req['mysqlPoolAP']          = mysqlPoolAP
+  req['mysqlPoolHd']          = mysqlPoolHd
   req['coreShowChannelsObj']  = coreShowChannelsObj
   req['wsServer']             = wsServer
   req['localDb']              = localDb
