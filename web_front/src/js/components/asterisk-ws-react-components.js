@@ -1,4 +1,5 @@
 import SwgControl       from './SwgControl'
+import WsControl        from './WsControl'
 import AuthWin          from './AuthWin'
 
 import PaperListItems   from './PaperListItems'
@@ -14,6 +15,7 @@ import AppMenuTop       from './AppMenuTop'
 
 export {
   SwgControl,
+  WsControl,
   AuthWin,
 
   PaperListItems,  

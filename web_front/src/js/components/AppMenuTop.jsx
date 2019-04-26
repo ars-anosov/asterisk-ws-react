@@ -18,6 +18,8 @@ import ListItemText from '@material-ui/core/ListItemText';
 
 import IconPower from '@material-ui/icons/Power';
 import IconPowerOff from '@material-ui/icons/PowerOff';
+import IconImportExport from '@material-ui/icons/ImportExport';
+
 import IconAccountCircle from '@material-ui/icons/AccountCircle';
 import Popover from '@material-ui/core/Popover';
 
@@ -99,7 +101,8 @@ class AppMenuTop extends React.Component {
 
     this.state = {
       open: false,
-      anchorEl: null,
+      anchorEl_api: null,
+      anchorEl_ws: null,
       anchorEl_user: null,
     }
 
@@ -126,14 +129,16 @@ class AppMenuTop extends React.Component {
   }
 
   handleClickAnchorEl(event) {
-    if ( event.currentTarget.getAttribute('popover_flag') === 'con_status' )  { this.setState({ anchorEl: event.currentTarget }) }
+    if ( event.currentTarget.getAttribute('popover_flag') === 'api_status' )  { this.setState({ anchorEl_api: event.currentTarget }) }
+    if ( event.currentTarget.getAttribute('popover_flag') === 'ws_status' )   { this.setState({ anchorEl_ws: event.currentTarget }) }
     if ( event.currentTarget.getAttribute('popover_flag') === 'user' )        { this.setState({ anchorEl_user: event.currentTarget }) }
   }
 
   handleCloseAnchorEl(event) {
     this.setState({
-      anchorEl: null,
-      anchorEl_user: null
+      anchorEl_api: null,
+      anchorEl_ws: null,
+      anchorEl_user: null,
     })
   }
 
@@ -144,15 +149,16 @@ class AppMenuTop extends React.Component {
     
     const {
       classes, theme,
-      swgControlRdcr,
+      swgControlRdcr, wsControlRdcr,
       appMenuRdcr,
       authRdcr, authActions
     } = this.props
 
     const {
       open,
-      anchorEl,
-      anchorEl_user
+      anchorEl_api,
+      anchorEl_ws,
+      anchorEl_user,
     } = this.state
 
     const swgClient      = swgControlRdcr.swgClient
@@ -181,15 +187,23 @@ class AppMenuTop extends React.Component {
             </Typography>
 
             <div className={classes.growRight} align='right'>
-              <Button variant="text" color='inherit' popover_flag="user" onClick={this.handleClickAnchorEl} >
-                <IconAccountCircle className={classes.leftIcon} /> <small>{authRdcr.clientUserData.name}</small>
+              <Button variant="text" color='inherit' popover_flag="user" onClick={this.handleClickAnchorEl} >{authRdcr.clientUserData.name}
+                <IconAccountCircle className={classes.rightIcon} />
               </Button>
 
-              <Button variant="text" color='inherit' popover_flag="con_status" onClick={this.handleClickAnchorEl} >
+              <Button variant="text" color='inherit' popover_flag="ws_status" onClick={this.handleClickAnchorEl} >ws
+              {
+                wsControlRdcr.StatusClass === 'ws-ok'
+                ? <IconImportExport color='inherit' className={classes.rightIcon} />
+                : <IconImportExport color='error' className={classes.rightIcon} />
+              }
+              </Button>
+
+              <Button variant="text" color='inherit' popover_flag="api_status" onClick={this.handleClickAnchorEl} >api
               {
                 swgControlRdcr.StatusClass === 'swg-ok'
-                ? <IconPower color='inherit' />
-                : <IconPowerOff color='error' />
+                ? <IconPower color='inherit' className={classes.rightIcon} />
+                : <IconPowerOff color='error' className={classes.rightIcon} />
               }
               </Button>
             </div>
@@ -240,26 +254,7 @@ class AppMenuTop extends React.Component {
 
 
         <Popover
-          id="con_status"
-          open={Boolean(anchorEl)}
-          anchorEl={anchorEl}
-          onClose={this.handleCloseAnchorEl}
-          anchorOrigin={{
-            vertical: 'bottom',
-            horizontal: 'center',
-          }}
-          transformOrigin={{
-            vertical: 'top',
-            horizontal: 'center',
-          }}
-        >
-          <Typography className={classes.popper}>Server connection: {swgControlRdcr.StatusTxt}</Typography>
-        </Popover>
-
-
-
-        <Popover
-          id="user"
+          id='user'
           open={Boolean(anchorEl_user)}
           anchorEl={anchorEl_user}
           onClose={this.handleCloseAnchorEl}
@@ -280,6 +275,52 @@ class AppMenuTop extends React.Component {
 
             authRdcr        ={authRdcr}
           />
+        </Popover>
+
+
+
+        <Popover
+          id='ws_status'
+          open={Boolean(anchorEl_ws)}
+          anchorEl={anchorEl_ws}
+          onClose={this.handleCloseAnchorEl}
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'center',
+          }}
+          transformOrigin={{
+            vertical: 'top',
+            horizontal: 'center',
+          }}
+        >
+          <div className={classes.popper}>
+            <Typography variant='h6'>WebSocket</Typography>
+            <Typography>status: {wsControlRdcr.StatusTxt}</Typography>
+            <Divider />
+            <Typography variant='caption'>{wsControlRdcr.wsClient.url}</Typography>
+          </div>
+        </Popover>
+
+        <Popover
+          id='api_status'
+          open={Boolean(anchorEl_api)}
+          anchorEl={anchorEl_api}
+          onClose={this.handleCloseAnchorEl}
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'center',
+          }}
+          transformOrigin={{
+            vertical: 'top',
+            horizontal: 'center',
+          }}
+        >
+          <div className={classes.popper}>
+            <Typography variant='h6'>OpenAPI</Typography>
+            <Typography>status: {swgControlRdcr.StatusTxt}</Typography>
+            <Divider />
+            <Typography variant='caption'>{swgControlRdcr.swgClient.url}</Typography>
+          </div>
         </Popover>
 
 

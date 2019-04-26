@@ -4,6 +4,7 @@ import { bindActionCreators } from 'redux'
 import { connect } from 'react-redux' 
  
 import * as swgControlActions   from '../actions/swgControlActions' 
+import * as wsControlActions    from '../actions/wsControlActions' 
 import * as authActions         from '../actions/authActions' 
 
 import * as appMenuActions      from '../actions/appMenuActions' 
@@ -11,7 +12,7 @@ import * as appMenuActions      from '../actions/appMenuActions'
 import { withStyles } from '@material-ui/core/styles'
 import withRoot from './withRoot'
 
-import { SwgControl, AuthWin, AppMenuTop }  from '../components/asterisk-ws-react-components'
+import { SwgControl, WsControl, AuthWin, AppMenuTop }  from '../components/asterisk-ws-react-components'
 
 
 
@@ -27,13 +28,14 @@ const styles = theme => ({
  
  
  
-class Cnt_connectAndAuth extends React.Component { 
+class Cnt_appMenu extends React.Component { 
   render() { 
-    console.log('Cnt_connectAndAuth render')
+    console.log('Cnt_appMenu render')
     const {
       classes,
-      specUrl,
+      specUrl, wsUrl,
       swgControlRdcr, swgControlActions,
+      wsControlRdcr, wsControlActions,
       authRdcr, authActions,
       appMenuRdcr, appMenuActions
     } = this.props
@@ -42,7 +44,8 @@ class Cnt_connectAndAuth extends React.Component {
 
     // Вытаскиваем из REDUX state -> swgControlRdcr : свойство swgClient
     // Его туда заполнил swgControlActions.swgConnectAct в компоненте SwgControl.jsx
-    const swgClient      = swgControlRdcr.swgClient
+    const swgClient     = swgControlRdcr.swgClient
+    const wsClient      = wsControlRdcr.wsClient
 
     // 1) Если API отдает message === 'token Unauthorized': все контейнеры делают dispatch AUTH_TOKEN_DISPLAY_BLK (authRdcr.displayBlock = true)
     // 2) Если первый вход: localStorage 'token' пустой. Так же реализован выход пользователя в UserProfile.jsx 
@@ -50,15 +53,29 @@ class Cnt_connectAndAuth extends React.Component {
   
     return (
     <div className={classes.divTop}>
-      
+
+
+
+      {/* Самостоятельные компоненты (прибиты position:absolute) */}
       <SwgControl
-        headerTxt         ='связь с сервером'
+        headerTxt         ='API connector'
         specUrl           ={specUrl}        
 
         swgControlActions ={swgControlActions}
-
         swgControlRdcr    ={swgControlRdcr}
       />
+
+      <WsControl
+        headerTxt         ='WS connector'
+        wsUrl             ={wsUrl}        
+
+        wsControlActions ={wsControlActions}
+        wsControlRdcr    ={wsControlRdcr}
+      />
+
+
+
+      {/* Верхняя менюшка material-ui : AppBar, Toolbar */}
       <AppMenuTop
         headerTxt         ='Start'
         swgClient         ={swgClient}
@@ -67,10 +84,15 @@ class Cnt_connectAndAuth extends React.Component {
         authActions       ={authActions}
 
         swgControlRdcr    ={swgControlRdcr}
+        wsControlRdcr    ={wsControlRdcr}
+
         appMenuRdcr       ={appMenuRdcr}
         authRdcr          ={authRdcr}
       />
 
+
+
+      {/* На случай если человек не авторизован */}
       <div className={ tokenUnauthorized || appMenuRdcr.itemSelected === 'Сменить пользователя' ? classes.topSpace : 'display-none'}>
         <AuthWin
           headerTxt       ='Вы не авторизованы'
@@ -81,6 +103,9 @@ class Cnt_connectAndAuth extends React.Component {
           authRdcr        ={authRdcr}
         />
       </div>
+
+
+
     </div>)
   }
 } 
@@ -94,27 +119,30 @@ class Cnt_connectAndAuth extends React.Component {
  
  
 // Редьюсеры уже лежат в Store через RootReducer 
-// Мэпим их из Redux Store в React-компоненту Connect(Cnt_connectAndAuth) 
+// Мэпим их из Redux Store в React-компоненту Connect(Cnt_appMenu) 
 function mapStateToProps (state) { 
   //console.log(state) 
   return { 
-    'specUrl':        window.localStorage.getItem('apiUrl')+'/spec/swagger.json', 
-    'swgControlRdcr': state.swgControlRdcr, 
+    'specUrl':        window.localStorage.getItem('apiUrl')+'/spec/swagger.json',
+    'wsUrl':          window.localStorage.getItem('wsUrl'),
+    'swgControlRdcr': state.swgControlRdcr,
+    'wsControlRdcr':  state.wsControlRdcr,
     'authRdcr':       state.authRdcr,
 
-    'appMenuRdcr':    state.appMenuRdcr 
+    'appMenuRdcr':    state.appMenuRdcr,
   } 
 } 
  
-// Мэпим Redux (actions --> Store:dispatch) через процедуру bindActionCreators в React-компоненту Connect(Cnt_connectAndAuth) 
+// Мэпим Redux (actions --> Store:dispatch) через процедуру bindActionCreators в React-компоненту Connect(Cnt_appMenu) 
 function mapDispatchToProps(dispatch) { 
   return { 
     'swgControlActions':  bindActionCreators(swgControlActions, dispatch), 
+    'wsControlActions':   bindActionCreators(wsControlActions, dispatch), 
     'authActions':        bindActionCreators(authActions, dispatch),
 
-    'appMenuActions':     bindActionCreators(appMenuActions, dispatch) 
+    'appMenuActions':     bindActionCreators(appMenuActions, dispatch),
   } 
 } 
  
-// Мэп и коннект: <Cnt_connectAndAuth> --> <Connect(Cnt_connectAndAuth)> 
-export default connect(mapStateToProps, mapDispatchToProps)( withRoot( withStyles(styles)(Cnt_connectAndAuth) ) ) 
+// Мэп и коннект: <Cnt_appMenu> --> <Connect(Cnt_appMenu)> 
+export default connect(mapStateToProps, mapDispatchToProps)( withRoot( withStyles(styles)(Cnt_appMenu) ) ) 

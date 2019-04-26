@@ -5,17 +5,19 @@ class SwgControl extends React.Component {
   constructor(args){
     super(args)
 
-    // Получаем Swagger spec, результат = swgClient
-    // Если swgClient успешно получен, делаем первичные обращения к API, см. метод swgConnectAct:
-    // 1) User info
-    this.props.swgControlActions.swgConnectAct(this.props.specUrl)
+    // Если еще нет swgClient то получаем его
+    if ( Object.keys(this.props.swgControlRdcr.swgClient).length === 0 ) {
+      this.props.swgControlActions.swgConnectAct(this.props.specUrl)
+    }
 
+    /*
     setInterval(
       () => {
         this.props.swgControlActions.swgConnectAct(this.props.specUrl)
       },
       10000
     )
+    */
 
   }
 
