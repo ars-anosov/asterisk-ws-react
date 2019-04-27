@@ -191,12 +191,12 @@ sed -i -e "s/host: '192.168.13.97:8018'/host: '10.229.x.x:8018'/" api/swagger.ya
 ```
 2. Правим ***localStorage[specUrl, wsUrl]*** готового build в [index.html](https://github.com/ars-anosov/asterisk-ws-react/blob/master/node-back/build_front/index.html)
 ```JavaScript
-    window.localStorage.setItem('specUrl',  'http://10.229.x.x:8018/spec/swagger.json')
-    window.localStorage.setItem('wsUrl',    'ws://10.229.x.x:8019')
+    window.localStorage.setItem('apiUrl', 'http://192.168.13.97:8018')
+    window.localStorage.setItem('wsUrl', 'ws://192.168.13.97:8019')
 ```
 ```bash
-sed -i -e "s/'http:\/\/192.168.13.97:8018\/spec\/swagger.json'/'http:\/\/10.229.x.x:8018\/spec\/swagger.json'/" ../web_front/build/index.html
-sed -i -e "s/'ws:\/\/192.168.13.97:8019'/'ws:\/\/10.229.x.x:8019'/" ../web_front/build/index.html
+sed -i -e "s/http:\/\/192.168.13.97:8018/http:\/\/10.229.x.x:8018/" ../web_front/build/index.html
+sed -i -e "s/ws:\/\/192.168.13.97:8019/ws:\/\/10.229.x.x:8019/" ../web_front/build/index.html
 ```
 
 ## Запуск

@@ -50,6 +50,7 @@
     "redux-logger": "^3.0.6",
     "redux-thunk": "^2.3.0",
     "swagger-client": "^3.8.25",
-    "typeface-roboto": "0.0.54"
+    "typeface-roboto": "0.0.54",
+    "zabbix-react-component": "^2.0.1"
   }
 }

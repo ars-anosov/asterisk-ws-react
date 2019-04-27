@@ -3,7 +3,8 @@ import React from 'react'
 import { bindActionCreators } from 'redux' 
 import { connect } from 'react-redux' 
  
-import * as swgControlActions   from '../actions/swgControlActions' 
+import * as swgControlActions   from '../actions/swgControlActions'
+import * as swgControlActions2   from '../actions/swgControlActions2'
 import * as wsControlActions    from '../actions/wsControlActions' 
 import * as authActions         from '../actions/authActions' 
 
@@ -34,7 +35,9 @@ class Cnt_appMenu extends React.Component {
     const {
       classes,
       specUrl, wsUrl,
+      specUrl2,
       swgControlRdcr, swgControlActions,
+      swgControlRdcr2, swgControlActions2,
       wsControlRdcr, wsControlActions,
       authRdcr, authActions,
       appMenuRdcr, appMenuActions
@@ -45,6 +48,7 @@ class Cnt_appMenu extends React.Component {
     // Вытаскиваем из REDUX state -> swgControlRdcr : свойство swgClient
     // Его туда заполнил swgControlActions.swgConnectAct в компоненте SwgControl.jsx
     const swgClient     = swgControlRdcr.swgClient
+    const swgClient2     = swgControlRdcr2.swgClient
     const wsClient      = wsControlRdcr.wsClient
 
     // 1) Если API отдает message === 'token Unauthorized': все контейнеры делают dispatch AUTH_TOKEN_DISPLAY_BLK (authRdcr.displayBlock = true)
@@ -63,6 +67,14 @@ class Cnt_appMenu extends React.Component {
 
         swgControlActions ={swgControlActions}
         swgControlRdcr    ={swgControlRdcr}
+      />
+
+      <SwgControl
+        headerTxt         ='API connector2'
+        specUrl           ={specUrl2}        
+
+        swgControlActions ={swgControlActions2}
+        swgControlRdcr    ={swgControlRdcr2}
       />
 
       <WsControl
@@ -124,8 +136,10 @@ function mapStateToProps (state) {
   //console.log(state) 
   return { 
     'specUrl':        window.localStorage.getItem('apiUrl')+'/spec/swagger.json',
+    'specUrl2':        window.localStorage.getItem('apiUrl2')+'/spec/swagger.json',
     'wsUrl':          window.localStorage.getItem('wsUrl'),
     'swgControlRdcr': state.swgControlRdcr,
+    'swgControlRdcr2': state.swgControlRdcr2,
     'wsControlRdcr':  state.wsControlRdcr,
     'authRdcr':       state.authRdcr,
 
@@ -136,7 +150,8 @@ function mapStateToProps (state) {
 // Мэпим Redux (actions --> Store:dispatch) через процедуру bindActionCreators в React-компоненту Connect(Cnt_appMenu) 
 function mapDispatchToProps(dispatch) { 
   return { 
-    'swgControlActions':  bindActionCreators(swgControlActions, dispatch), 
+    'swgControlActions':  bindActionCreators(swgControlActions, dispatch),
+    'swgControlActions2':  bindActionCreators(swgControlActions2, dispatch), 
     'wsControlActions':   bindActionCreators(wsControlActions, dispatch), 
     'authActions':        bindActionCreators(authActions, dispatch),
 
