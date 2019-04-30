@@ -11,7 +11,7 @@ import {
 
 
 
-export function wsConnectAct(wsUrl) {
+function wsConnectAct(wsUrl, nickname) {
   
   return (dispatch) => {
     // try
@@ -27,6 +27,9 @@ export function wsConnectAct(wsUrl) {
     
     
     socket.onopen = function() {
+      // Первое сообщение будет принято бэкэндом как nickname
+      socket.send(nickname)
+
       dispatch({
         type: WSCTL_CONNECT_SUCCESS,
         payload: {'wsClient': socket, 'message': 'Ok'}
@@ -55,11 +58,10 @@ export function wsConnectAct(wsUrl) {
     }
 
 
-
     socket.onmessage = function(event) {
       dispatch({
         type: WS_MSG_EVENT,
-        payload: {'event': JSON.parse(event.data)}
+        payload: {'data': JSON.parse(event.data)}
       })
     }
     /*
@@ -71,4 +73,16 @@ export function wsConnectAct(wsUrl) {
 
   }
 
+}
+
+
+
+
+
+
+
+
+
+export {
+  wsConnectAct,
 }

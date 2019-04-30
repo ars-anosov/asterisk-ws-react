@@ -89765,7 +89765,7 @@ function handleMenuSelect(event, swgClient) {
   };
 }
 
-},{"../constants/appMenuConst":734,"./hdActions":715}],714:[function(require,module,exports){
+},{"../constants/appMenuConst":736,"./hdActions":715}],714:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -89775,7 +89775,11 @@ exports.authTokenAct = authTokenAct;
 exports.clientUserDataGet = clientUserDataGet;
 exports.handleChangeData = handleChangeData;
 
+var wsControlActions = _interopRequireWildcard(require("./wsControlActions"));
+
 var _authConst = require("../constants/authConst");
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = Object.defineProperty && Object.getOwnPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : {}; if (desc.get || desc.set) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj["default"] = obj; return newObj; } }
 
 function authTokenAct(swgClient, authName, authPass) {
   return function (dispatch) {
@@ -89850,7 +89854,12 @@ function clientUserDataGet(swgClient, token) {
             payload: {
               'data': res.body
             }
-          });
+          }); // --------------------------------------------------------
+          // Поднимаю WebSocket для этого пользователя
+          // --------------------------------------------------------
+
+          var wsUrl = window.localStorage.getItem('wsUrl');
+          dispatch(wsControlActions.wsConnectAct(wsUrl, res.body.exten_arr));
         }
 
         if (res.status == '202' && res.body) {
@@ -89896,7 +89905,7 @@ function handleChangeData(event) {
   };
 }
 
-},{"../constants/authConst":735}],715:[function(require,module,exports){
+},{"../constants/authConst":737,"./wsControlActions":718}],715:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -89963,7 +89972,7 @@ function ttMyListGet(swgClient, token) {
   };
 }
 
-},{"../constants/authConst":735,"../constants/hdConst":736}],716:[function(require,module,exports){
+},{"../constants/authConst":737,"../constants/hdConst":738}],716:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -90003,7 +90012,9 @@ function swgConnectAct(specUrl) {
       // Стартовые запросы у компонент после получения swgClient
       // --------------------------------------------------------
 
-      var token = window.localStorage.getItem('token');
+      var token = window.localStorage.getItem('token'); // Получаю данные клиента
+      // В clientUserDataGet зашит WebSocket connect (под данными пользователя)
+
       dispatch(authActions.clientUserDataGet(client, token));
     })["catch"](function (err) {
       // err
@@ -90012,7 +90023,7 @@ function swgConnectAct(specUrl) {
   };
 }
 
-},{"../constants/swgControlConst":737,"./authActions":714,"swagger-client":695}],717:[function(require,module,exports){
+},{"../constants/swgControlConst":739,"./authActions":714,"swagger-client":695}],717:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -90060,7 +90071,7 @@ function swgConnectAct(specUrl) {
   };
 }
 
-},{"../constants/swgControlConst2":738,"./authActions":714,"swagger-client":695}],718:[function(require,module,exports){
+},{"../constants/swgControlConst2":740,"./authActions":714,"swagger-client":695}],718:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -90070,7 +90081,7 @@ exports.wsConnectAct = wsConnectAct;
 
 var _wsControlConst = require("../constants/wsControlConst");
 
-function wsConnectAct(wsUrl) {
+function wsConnectAct(wsUrl, nickname) {
   return function (dispatch) {
     // try
     dispatch({
@@ -90083,6 +90094,8 @@ function wsConnectAct(wsUrl) {
     var socket = new WebSocket("ws://192.168.13.97:8019");
 
     socket.onopen = function () {
+      // Первое сообщение будет принято бэкэндом как nickname
+      socket.send(nickname);
       dispatch({
         type: _wsControlConst.WSCTL_CONNECT_SUCCESS,
         payload: {
@@ -90115,7 +90128,7 @@ function wsConnectAct(wsUrl) {
       dispatch({
         type: _wsControlConst.WS_MSG_EVENT,
         payload: {
-          'event': JSON.parse(event.data)
+          'data': JSON.parse(event.data)
         }
       });
     };
@@ -90128,7 +90141,28 @@ function wsConnectAct(wsUrl) {
   };
 }
 
-},{"../constants/wsControlConst":739}],719:[function(require,module,exports){
+},{"../constants/wsControlConst":741}],719:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.hideWin = hideWin;
+
+var _wsPopupConst = require("../constants/wsPopupConst");
+
+function hideWin() {
+  return function (dispatch) {
+    dispatch({
+      type: _wsPopupConst.WSPP_DISPLAY_BLK,
+      payload: {
+        'boolVal': false
+      }
+    });
+  };
+}
+
+},{"../constants/wsPopupConst":742}],720:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -90357,6 +90391,7 @@ function (_React$Component) {
           classes = _this$props.classes,
           theme = _this$props.theme,
           swgControlRdcr = _this$props.swgControlRdcr,
+          swgControlRdcr2 = _this$props.swgControlRdcr2,
           wsControlRdcr = _this$props.wsControlRdcr,
           appMenuRdcr = _this$props.appMenuRdcr,
           authRdcr = _this$props.authRdcr,
@@ -90486,7 +90521,7 @@ function (_React$Component) {
         className: classes.popper
       }, _react["default"].createElement(_Typography["default"], {
         variant: "h6"
-      }, "WebSocket"), _react["default"].createElement(_Typography["default"], null, "status: ", wsControlRdcr.StatusTxt), _react["default"].createElement(_Divider["default"], null), _react["default"].createElement(_Typography["default"], {
+      }, "WebSocket"), _react["default"].createElement("br", null), _react["default"].createElement(_Typography["default"], null, "status: ", wsControlRdcr.StatusTxt), _react["default"].createElement(_Divider["default"], null), _react["default"].createElement(_Typography["default"], {
         variant: "caption"
       }, wsControlRdcr.wsClient.url))), _react["default"].createElement(_Popover["default"], {
         id: "api_status",
@@ -90505,9 +90540,11 @@ function (_React$Component) {
         className: classes.popper
       }, _react["default"].createElement(_Typography["default"], {
         variant: "h6"
-      }, "OpenAPI"), _react["default"].createElement(_Typography["default"], null, "status: ", swgControlRdcr.StatusTxt), _react["default"].createElement(_Divider["default"], null), _react["default"].createElement(_Typography["default"], {
+      }, "OpenAPI"), _react["default"].createElement("br", null), _react["default"].createElement(_Typography["default"], null, "status: ", swgControlRdcr.StatusTxt), _react["default"].createElement(_Divider["default"], null), _react["default"].createElement(_Typography["default"], {
         variant: "caption"
-      }, swgControlRdcr.swgClient.url))));
+      }, swgControlRdcr.swgClient.url), _react["default"].createElement("br", null), _react["default"].createElement(_Typography["default"], null, "status: ", swgControlRdcr2.StatusTxt), _react["default"].createElement(_Divider["default"], null), _react["default"].createElement(_Typography["default"], {
+        variant: "caption"
+      }, swgControlRdcr2.swgClient.url))));
     }
   }]);
 
@@ -90524,7 +90561,7 @@ var _default = (0, _styles.withStyles)(styles, {
 
 exports["default"] = _default;
 
-},{"./asterisk-ws-react-components":724,"@material-ui/core/AppBar":52,"@material-ui/core/Button":58,"@material-ui/core/Divider":68,"@material-ui/core/Drawer":70,"@material-ui/core/IconButton":85,"@material-ui/core/List":96,"@material-ui/core/ListItem":99,"@material-ui/core/ListItemText":101,"@material-ui/core/Popover":112,"@material-ui/core/Toolbar":122,"@material-ui/core/Typography":124,"@material-ui/core/styles":142,"@material-ui/icons/AccountCircle":161,"@material-ui/icons/ChevronLeft":162,"@material-ui/icons/ChevronRight":163,"@material-ui/icons/ImportExport":165,"@material-ui/icons/Menu":167,"@material-ui/icons/Power":168,"@material-ui/icons/PowerOff":169,"classnames":323,"prop-types":729,"react":663}],720:[function(require,module,exports){
+},{"./asterisk-ws-react-components":726,"@material-ui/core/AppBar":52,"@material-ui/core/Button":58,"@material-ui/core/Divider":68,"@material-ui/core/Drawer":70,"@material-ui/core/IconButton":85,"@material-ui/core/List":96,"@material-ui/core/ListItem":99,"@material-ui/core/ListItemText":101,"@material-ui/core/Popover":112,"@material-ui/core/Toolbar":122,"@material-ui/core/Typography":124,"@material-ui/core/styles":142,"@material-ui/icons/AccountCircle":161,"@material-ui/icons/ChevronLeft":162,"@material-ui/icons/ChevronRight":163,"@material-ui/icons/ImportExport":165,"@material-ui/icons/Menu":167,"@material-ui/icons/Power":168,"@material-ui/icons/PowerOff":169,"classnames":323,"prop-types":731,"react":663}],721:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -90742,7 +90779,7 @@ var _default = (0, _withStyles["default"])(styles)(AuthWin);
 
 exports["default"] = _default;
 
-},{"@material-ui/core/Avatar":54,"@material-ui/core/Button":58,"@material-ui/core/CssBaseline":66,"@material-ui/core/FormControl":76,"@material-ui/core/Input":87,"@material-ui/core/InputLabel":93,"@material-ui/core/Paper":110,"@material-ui/core/Typography":124,"@material-ui/core/styles/withStyles":152,"@material-ui/icons/LockOutlined":166,"prop-types":729,"react":663}],721:[function(require,module,exports){
+},{"@material-ui/core/Avatar":54,"@material-ui/core/Button":58,"@material-ui/core/CssBaseline":66,"@material-ui/core/FormControl":76,"@material-ui/core/Input":87,"@material-ui/core/InputLabel":93,"@material-ui/core/Paper":110,"@material-ui/core/Typography":124,"@material-ui/core/styles/withStyles":152,"@material-ui/icons/LockOutlined":166,"prop-types":731,"react":663}],722:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -90918,7 +90955,7 @@ var _default = (0, _styles.withStyles)(styles)(PaperListItems);
 
 exports["default"] = _default;
 
-},{"@material-ui/core/Divider":68,"@material-ui/core/Input":87,"@material-ui/core/List":96,"@material-ui/core/ListItem":99,"@material-ui/core/ListItemText":101,"@material-ui/core/Paper":110,"@material-ui/core/Typography":124,"@material-ui/core/styles":142,"@material-ui/icons/Clear":164,"react":663}],722:[function(require,module,exports){
+},{"@material-ui/core/Divider":68,"@material-ui/core/Input":87,"@material-ui/core/List":96,"@material-ui/core/ListItem":99,"@material-ui/core/ListItemText":101,"@material-ui/core/Paper":110,"@material-ui/core/Typography":124,"@material-ui/core/styles":142,"@material-ui/icons/Clear":164,"react":663}],723:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -90999,7 +91036,7 @@ function (_React$Component) {
 var _default = SwgControl;
 exports["default"] = _default;
 
-},{"react":663}],723:[function(require,module,exports){
+},{"react":663}],724:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -91035,17 +91072,16 @@ function (_React$Component) {
   _inherits(WsControl, _React$Component);
 
   function WsControl(args) {
-    var _this;
-
     _classCallCheck(this, WsControl);
 
-    _this = _possibleConstructorReturn(this, _getPrototypeOf(WsControl).call(this, args)); // Если еще нет wsClient то получаем его
+    return _possibleConstructorReturn(this, _getPrototypeOf(WsControl).call(this, args)); // Если еще нет wsClient то получаем его
+    // Перетащил в AuthActions.js-clientUserDataGet
 
-    if (Object.keys(_this.props.wsControlRdcr.wsClient).length === 0) {
-      _this.props.wsControlActions.wsConnectAct(_this.props.wsUrl);
+    /*
+    if ( Object.keys(this.props.wsControlRdcr.wsClient).length === 0 ) {
+      this.props.wsControlActions.wsConnectAct(this.props.wsUrl)
     }
-
-    return _this;
+    */
   }
 
   _createClass(WsControl, [{
@@ -91053,20 +91089,13 @@ function (_React$Component) {
     value: function render() {
       console.log('WsControl render');
       var wsControlRdcr = this.props.wsControlRdcr;
-      var callStr = '';
-
-      if (wsControlRdcr.msgEvent && wsControlRdcr.msgEvent.calleridnum) {
-        callStr += 'context: ' + wsControlRdcr.msgEvent.context + '\n';
-        callStr += 'calleridnum: ' + wsControlRdcr.msgEvent.calleridnum + '\n';
-        callStr += 'exten: ' + wsControlRdcr.msgEvent.exten + '\n';
-      }
 
       var finalTemplate = _react["default"].createElement("div", {
         className: wsControlRdcr.displayBlock ? 'wscontrol-win' : 'display-none'
       }, this.props.headerTxt, " ", _react["default"].createElement("button", {
         className: wsControlRdcr.StatusClass,
         value: wsControlRdcr.StatusTxt
-      }, wsControlRdcr.StatusTxt), _react["default"].createElement("pre", null, callStr));
+      }, wsControlRdcr.StatusTxt));
 
       return finalTemplate;
     }
@@ -91078,7 +91107,70 @@ function (_React$Component) {
 var _default = WsControl;
 exports["default"] = _default;
 
-},{"react":663}],724:[function(require,module,exports){
+},{"react":663}],725:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports["default"] = void 0;
+
+var _react = _interopRequireDefault(require("react"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+var WsPopup =
+/*#__PURE__*/
+function (_React$Component) {
+  _inherits(WsPopup, _React$Component);
+
+  function WsPopup(args) {
+    _classCallCheck(this, WsPopup);
+
+    return _possibleConstructorReturn(this, _getPrototypeOf(WsPopup).call(this, args));
+  }
+
+  _createClass(WsPopup, [{
+    key: "render",
+    value: function render() {
+      console.log('WsPopup render');
+      var wsPopupRdcr = this.props.wsPopupRdcr;
+      var msg = wsPopupRdcr.msgEvent;
+      msg.lines = '';
+
+      var finalTemplate = _react["default"].createElement("div", {
+        className: wsPopupRdcr.displayBlock ? 'wspopup-win' : 'display-none'
+      }, _react["default"].createElement("h4", null, this.props.headerTxt), _react["default"].createElement("pre", null, JSON.stringify(msg, null, '\t')));
+
+      return finalTemplate;
+    }
+  }]);
+
+  return WsPopup;
+}(_react["default"].Component);
+
+var _default = WsPopup;
+exports["default"] = _default;
+
+},{"react":663}],726:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -91114,6 +91206,12 @@ Object.defineProperty(exports, "AppMenuTop", {
     return _AppMenuTop["default"];
   }
 });
+Object.defineProperty(exports, "WsPopup", {
+  enumerable: true,
+  get: function get() {
+    return _WsPopup["default"];
+  }
+});
 
 var _SwgControl = _interopRequireDefault(require("./SwgControl"));
 
@@ -91125,27 +91223,29 @@ var _PaperListItems = _interopRequireDefault(require("./PaperListItems"));
 
 var _AppMenuTop = _interopRequireDefault(require("./AppMenuTop"));
 
+var _WsPopup = _interopRequireDefault(require("./WsPopup"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
-},{"./AppMenuTop":719,"./AuthWin":720,"./PaperListItems":721,"./SwgControl":722,"./WsControl":723}],725:[function(require,module,exports){
+},{"./AppMenuTop":720,"./AuthWin":721,"./PaperListItems":722,"./SwgControl":723,"./WsControl":724,"./WsPopup":725}],727:[function(require,module,exports){
 arguments[4][613][0].apply(exports,arguments)
-},{"dup":613}],726:[function(require,module,exports){
+},{"dup":613}],728:[function(require,module,exports){
 arguments[4][616][0].apply(exports,arguments)
-},{"./lib/ReactPropTypesSecret":730,"_process":615,"dup":616}],727:[function(require,module,exports){
+},{"./lib/ReactPropTypesSecret":732,"_process":615,"dup":616}],729:[function(require,module,exports){
 arguments[4][617][0].apply(exports,arguments)
-},{"./lib/ReactPropTypesSecret":730,"dup":617}],728:[function(require,module,exports){
+},{"./lib/ReactPropTypesSecret":732,"dup":617}],730:[function(require,module,exports){
 arguments[4][618][0].apply(exports,arguments)
-},{"./checkPropTypes":726,"./lib/ReactPropTypesSecret":730,"_process":615,"dup":618,"object-assign":725,"react-is":733}],729:[function(require,module,exports){
+},{"./checkPropTypes":728,"./lib/ReactPropTypesSecret":732,"_process":615,"dup":618,"object-assign":727,"react-is":735}],731:[function(require,module,exports){
 arguments[4][619][0].apply(exports,arguments)
-},{"./factoryWithThrowingShims":727,"./factoryWithTypeCheckers":728,"_process":615,"dup":619,"react-is":733}],730:[function(require,module,exports){
+},{"./factoryWithThrowingShims":729,"./factoryWithTypeCheckers":730,"_process":615,"dup":619,"react-is":735}],732:[function(require,module,exports){
 arguments[4][620][0].apply(exports,arguments)
-},{"dup":620}],731:[function(require,module,exports){
+},{"dup":620}],733:[function(require,module,exports){
 arguments[4][635][0].apply(exports,arguments)
-},{"_process":615,"dup":635}],732:[function(require,module,exports){
+},{"_process":615,"dup":635}],734:[function(require,module,exports){
 arguments[4][636][0].apply(exports,arguments)
-},{"dup":636}],733:[function(require,module,exports){
+},{"dup":636}],735:[function(require,module,exports){
 arguments[4][637][0].apply(exports,arguments)
-},{"./cjs/react-is.development.js":731,"./cjs/react-is.production.min.js":732,"_process":615,"dup":637}],734:[function(require,module,exports){
+},{"./cjs/react-is.development.js":733,"./cjs/react-is.production.min.js":734,"_process":615,"dup":637}],736:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -91155,7 +91255,7 @@ exports.MENU_DATA_USER_SELECT = void 0;
 var MENU_DATA_USER_SELECT = 'MENU_DATA_USER_SELECT';
 exports.MENU_DATA_USER_SELECT = MENU_DATA_USER_SELECT;
 
-},{}],735:[function(require,module,exports){
+},{}],737:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -91179,7 +91279,7 @@ exports.AUTH_USER_GET_202 = AUTH_USER_GET_202;
 var AUTH_DATA_USER_INPUT = 'AUTH_DATA_USER_INPUT';
 exports.AUTH_DATA_USER_INPUT = AUTH_DATA_USER_INPUT;
 
-},{}],736:[function(require,module,exports){
+},{}],738:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -91197,7 +91297,7 @@ exports.HD_TTMY_202 = HD_TTMY_202;
 var HD_USER_INPUT = 'HD_USER_INPUT';
 exports.HD_USER_INPUT = HD_USER_INPUT;
 
-},{}],737:[function(require,module,exports){
+},{}],739:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -91211,7 +91311,7 @@ exports.SWGCTL_CONNECT_REQUEST = SWGCTL_CONNECT_REQUEST;
 var SWGCTL_CONNECT_SUCCESS = 'SWGCTL_CONNECT_SUCCESS';
 exports.SWGCTL_CONNECT_SUCCESS = SWGCTL_CONNECT_SUCCESS;
 
-},{}],738:[function(require,module,exports){
+},{}],740:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -91225,7 +91325,7 @@ exports.SWGCTL2_CONNECT_REQUEST = SWGCTL2_CONNECT_REQUEST;
 var SWGCTL2_CONNECT_SUCCESS = 'SWGCTL2_CONNECT_SUCCESS';
 exports.SWGCTL2_CONNECT_SUCCESS = SWGCTL2_CONNECT_SUCCESS;
 
-},{}],739:[function(require,module,exports){
+},{}],741:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -91245,7 +91345,17 @@ exports.WSCTL_DISCONNECT_ERR = WSCTL_DISCONNECT_ERR;
 var WS_MSG_EVENT = 'WS_MSG_EVENT';
 exports.WS_MSG_EVENT = WS_MSG_EVENT;
 
-},{}],740:[function(require,module,exports){
+},{}],742:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.WSPP_DISPLAY_BLK = void 0;
+var WSPP_DISPLAY_BLK = 'WSPP_DISPLAY_BLK';
+exports.WSPP_DISPLAY_BLK = WSPP_DISPLAY_BLK;
+
+},{}],743:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -91268,6 +91378,8 @@ var wsControlActions = _interopRequireWildcard(require("../actions/wsControlActi
 var authActions = _interopRequireWildcard(require("../actions/authActions"));
 
 var appMenuActions = _interopRequireWildcard(require("../actions/appMenuActions"));
+
+var wsPopupActions = _interopRequireWildcard(require("../actions/wsPopupActions"));
 
 var _styles = require("@material-ui/core/styles");
 
@@ -91338,7 +91450,9 @@ function (_React$Component) {
           authRdcr = _this$props.authRdcr,
           authActions = _this$props.authActions,
           appMenuRdcr = _this$props.appMenuRdcr,
-          appMenuActions = _this$props.appMenuActions; // Всякое намэпленое в результате connect() лежит в this.props
+          appMenuActions = _this$props.appMenuActions,
+          wsPopupRdcr = _this$props.wsPopupRdcr,
+          wsPopupActions = _this$props.wsPopupActions; // Всякое намэпленое в результате connect() лежит в this.props
       // Вытаскиваем из REDUX state -> swgControlRdcr : свойство swgClient
       // Его туда заполнил swgControlActions.swgConnectAct в компоненте SwgControl.jsx
 
@@ -91371,9 +91485,15 @@ function (_React$Component) {
         appMenuActions: appMenuActions,
         authActions: authActions,
         swgControlRdcr: swgControlRdcr,
+        swgControlRdcr2: swgControlRdcr2,
         wsControlRdcr: wsControlRdcr,
         appMenuRdcr: appMenuRdcr,
         authRdcr: authRdcr
+      }), _react["default"].createElement(_asteriskWsReactComponents.WsPopup, {
+        headerTxt: "WS popup",
+        wsClient: wsClient,
+        wsPopupActions: wsPopupActions,
+        wsPopupRdcr: wsPopupRdcr
       }), _react["default"].createElement("div", {
         className: tokenUnauthorized || appMenuRdcr.itemSelected === 'Сменить пользователя' ? classes.topSpace : 'display-none'
       }, _react["default"].createElement(_asteriskWsReactComponents.AuthWin, {
@@ -91400,7 +91520,8 @@ function mapStateToProps(state) {
     'swgControlRdcr2': state.swgControlRdcr2,
     'wsControlRdcr': state.wsControlRdcr,
     'authRdcr': state.authRdcr,
-    'appMenuRdcr': state.appMenuRdcr
+    'appMenuRdcr': state.appMenuRdcr,
+    'wsPopupRdcr': state.wsPopupRdcr
   };
 } // Мэпим Redux (actions --> Store:dispatch) через процедуру bindActionCreators в React-компоненту Connect(Cnt_appMenu) 
 
@@ -91411,7 +91532,8 @@ function mapDispatchToProps(dispatch) {
     'swgControlActions2': (0, _redux.bindActionCreators)(swgControlActions2, dispatch),
     'wsControlActions': (0, _redux.bindActionCreators)(wsControlActions, dispatch),
     'authActions': (0, _redux.bindActionCreators)(authActions, dispatch),
-    'appMenuActions': (0, _redux.bindActionCreators)(appMenuActions, dispatch)
+    'appMenuActions': (0, _redux.bindActionCreators)(appMenuActions, dispatch),
+    'wsPopupActions': (0, _redux.bindActionCreators)(wsPopupActions, dispatch)
   };
 } // Мэп и коннект: <Cnt_appMenu> --> <Connect(Cnt_appMenu)> 
 
@@ -91420,7 +91542,7 @@ var _default = (0, _reactRedux.connect)(mapStateToProps, mapDispatchToProps)((0,
 
 exports["default"] = _default;
 
-},{"../actions/appMenuActions":713,"../actions/authActions":714,"../actions/swgControlActions":716,"../actions/swgControlActions2":717,"../actions/wsControlActions":718,"../components/asterisk-ws-react-components":724,"./withRoot":744,"@material-ui/core/styles":142,"react":663,"react-redux":649,"redux":683}],741:[function(require,module,exports){
+},{"../actions/appMenuActions":713,"../actions/authActions":714,"../actions/swgControlActions":716,"../actions/swgControlActions2":717,"../actions/wsControlActions":718,"../actions/wsPopupActions":719,"../components/asterisk-ws-react-components":726,"./withRoot":747,"@material-ui/core/styles":142,"react":663,"react-redux":649,"redux":683}],744:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -91613,7 +91735,7 @@ var _default = (0, _reactRedux.connect)(mapStateToProps, mapDispatchToProps)((0,
 
 exports["default"] = _default;
 
-},{"../actions/hdActions":715,"../components/asterisk-ws-react-components":724,"./withRoot":744,"@material-ui/core/Grid":81,"@material-ui/core/styles":142,"react":663,"react-redux":649,"redux":683}],742:[function(require,module,exports){
+},{"../actions/hdActions":715,"../components/asterisk-ws-react-components":726,"./withRoot":747,"@material-ui/core/Grid":81,"@material-ui/core/styles":142,"react":663,"react-redux":649,"redux":683}],745:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -91771,7 +91893,7 @@ var _default = (0, _reactRedux.connect)(mapStateToProps, mapDispatchToProps)((0,
 
 exports["default"] = _default;
 
-},{"./withRoot":744,"@material-ui/core/Grid":81,"@material-ui/core/styles":142,"react":663,"react-redux":649,"redux":683,"zabbix-react-component":712}],743:[function(require,module,exports){
+},{"./withRoot":747,"@material-ui/core/Grid":81,"@material-ui/core/styles":142,"react":663,"react-redux":649,"redux":683,"zabbix-react-component":712}],746:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -91924,7 +92046,7 @@ var _default = (0, _reactRedux.connect)(mapStateToProps, mapDispatchToProps)((0,
 
 exports["default"] = _default;
 
-},{"./withRoot":744,"@material-ui/core/Grid":81,"@material-ui/core/Typography":124,"@material-ui/core/styles":142,"react":663,"react-redux":649,"redux":683}],744:[function(require,module,exports){
+},{"./withRoot":747,"@material-ui/core/Grid":81,"@material-ui/core/Typography":124,"@material-ui/core/styles":142,"react":663,"react-redux":649,"redux":683}],747:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -91980,7 +92102,7 @@ function withRoot(Component) {
 var _default = withRoot;
 exports["default"] = _default;
 
-},{"@material-ui/core/CssBaseline":66,"@material-ui/core/colors/red":129,"@material-ui/core/colors/teal":130,"@material-ui/core/styles":142,"react":663}],745:[function(require,module,exports){
+},{"@material-ui/core/CssBaseline":66,"@material-ui/core/colors/red":129,"@material-ui/core/colors/teal":130,"@material-ui/core/styles":142,"react":663}],748:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -92026,7 +92148,7 @@ function appMenuRdcr() {
   }
 }
 
-},{"../constants/appMenuConst":734}],746:[function(require,module,exports){
+},{"../constants/appMenuConst":736}],749:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -92112,7 +92234,7 @@ function authRdcr() {
   }
 }
 
-},{"../constants/authConst":735,"../sub_modules/html_tools":754}],747:[function(require,module,exports){
+},{"../constants/authConst":737,"../sub_modules/html_tools":758}],750:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -92172,7 +92294,7 @@ function _default() {
   }
 }
 
-},{"../constants/hdConst":736,"../sub_modules/html_tools":754}],748:[function(require,module,exports){
+},{"../constants/hdConst":738,"../sub_modules/html_tools":758}],751:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -92192,6 +92314,8 @@ var _authRdcr = _interopRequireDefault(require("./authRdcr"));
 
 var _appMenuRdcr = _interopRequireDefault(require("./appMenuRdcr"));
 
+var _wsPopupRdcr = _interopRequireDefault(require("./wsPopupRdcr"));
+
 var _hdRdcr = _interopRequireDefault(require("./hdRdcr"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
@@ -92202,12 +92326,13 @@ var _default = (0, _redux.combineReducers)({
   wsControlRdcr: _wsControlRdcr["default"],
   authRdcr: _authRdcr["default"],
   appMenuRdcr: _appMenuRdcr["default"],
+  wsPopupRdcr: _wsPopupRdcr["default"],
   hdRdcr: _hdRdcr["default"]
 });
 
 exports["default"] = _default;
 
-},{"./appMenuRdcr":745,"./authRdcr":746,"./hdRdcr":747,"./swgControlRdcr":749,"./swgControlRdcr2":750,"./wsControlRdcr":751,"redux":683}],749:[function(require,module,exports){
+},{"./appMenuRdcr":748,"./authRdcr":749,"./hdRdcr":750,"./swgControlRdcr":752,"./swgControlRdcr2":753,"./wsControlRdcr":754,"./wsPopupRdcr":755,"redux":683}],752:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -92259,7 +92384,7 @@ function swgControlRdcr() {
   }
 }
 
-},{"../constants/swgControlConst":737}],750:[function(require,module,exports){
+},{"../constants/swgControlConst":739}],753:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -92311,7 +92436,7 @@ function swgControlRdcr2() {
   }
 }
 
-},{"../constants/swgControlConst2":738}],751:[function(require,module,exports){
+},{"../constants/swgControlConst2":740}],754:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -92329,8 +92454,7 @@ var initialState = {
   displayBlock: true,
   wsClient: {},
   StatusTxt: 'Start',
-  StatusClass: 'ws-off',
-  msgEvent: {}
+  StatusClass: 'ws-off'
 };
 
 function wsControlRdcr() {
@@ -92363,11 +92487,6 @@ function wsControlRdcr() {
         StatusClass: 'ws-err'
       });
 
-    case _wsControlConst.WS_MSG_EVENT:
-      return _objectSpread({}, state, {
-        msgEvent: action.payload.event
-      });
-
     case _wsControlConst.WSCTL_DISPLAY_BLK:
       return _objectSpread({}, state, {
         displayBlock: action.payload.boolVal
@@ -92378,7 +92497,59 @@ function wsControlRdcr() {
   }
 }
 
-},{"../constants/wsControlConst":739}],752:[function(require,module,exports){
+},{"../constants/wsControlConst":741}],755:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports["default"] = wsPopupRdcr;
+
+var _wsPopupConst = require("../constants/wsPopupConst");
+
+var _wsControlConst = require("../constants/wsControlConst");
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(source); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+var initialState = {
+  displayBlock: false,
+  msgEvent: {}
+};
+
+function wsPopupRdcr() {
+  var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : initialState;
+  var action = arguments.length > 1 ? arguments[1] : undefined;
+
+  switch (action.type) {
+    case _wsPopupConst.WSPP_DISPLAY_BLK:
+      return _objectSpread({}, state, {
+        displayBlock: action.payload.boolVal
+      });
+
+    case _wsControlConst.WS_MSG_EVENT:
+      var displayBoolVal = false;
+
+      if (action.payload.data.event === 'Newchannel' || action.payload.data.event === 'Newstate' || action.payload.data.event === 'NewAccountCode' || action.payload.data.event === 'Dial' || action.payload.data.event === 'HangupRequest' || action.payload.data.event === 'SoftHangupRequest' || action.payload.data.event === 'NewCallerid') {
+        displayBoolVal = true;
+      }
+
+      if (action.payload.data.event === 'Hangup') {
+        displayBoolVal = false;
+      }
+
+      return _objectSpread({}, state, {
+        msgEvent: action.payload.data,
+        displayBlock: displayBoolVal
+      });
+
+    default:
+      return state;
+  }
+}
+
+},{"../constants/wsControlConst":741,"../constants/wsPopupConst":742}],756:[function(require,module,exports){
 'use strict';
 
 var _react = _interopRequireDefault(require("react"));
@@ -92405,7 +92576,7 @@ _reactDom["default"].render(_react["default"].createElement(_reactRedux.Provider
   store: store
 }, _react["default"].createElement(_Cnt_appMenu["default"], null), _react["default"].createElement(_Cnt_hd["default"], null), _react["default"].createElement(_Cnt_phone["default"], null), _react["default"].createElement(_Cnt_monit["default"], null)), document.getElementById('root'));
 
-},{"./containers/Cnt_appMenu":740,"./containers/Cnt_hd":741,"./containers/Cnt_monit":742,"./containers/Cnt_phone":743,"./store/configureStore":753,"react":663,"react-dom":633,"react-redux":649}],753:[function(require,module,exports){
+},{"./containers/Cnt_appMenu":743,"./containers/Cnt_hd":744,"./containers/Cnt_monit":745,"./containers/Cnt_phone":746,"./store/configureStore":757,"react":663,"react-dom":633,"react-redux":649}],757:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -92432,7 +92603,7 @@ function configureStore(initialState) {
   return store;
 }
 
-},{"../reducers/rootReducer":748,"redux":683,"redux-logger":681,"redux-thunk":682}],754:[function(require,module,exports){
+},{"../reducers/rootReducer":751,"redux":683,"redux-logger":681,"redux-thunk":682}],758:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -92458,4 +92629,4 @@ function ISODateString(d) {
   return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
 }
 
-},{}]},{},[752]);
+},{}]},{},[756]);

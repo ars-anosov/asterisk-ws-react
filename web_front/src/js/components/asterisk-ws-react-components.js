@@ -6,6 +6,7 @@ import PaperListItems   from './PaperListItems'
 
 // Cnt_appMenu components
 import AppMenuTop       from './AppMenuTop'
+import WsPopup          from './WsPopup'
 
 // Cnt_hd conponents
 
@@ -21,5 +22,6 @@ export {
   PaperListItems,  
 
   AppMenuTop,
+  WsPopup,
 
 }

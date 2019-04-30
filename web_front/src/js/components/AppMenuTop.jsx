@@ -149,7 +149,8 @@ class AppMenuTop extends React.Component {
     
     const {
       classes, theme,
-      swgControlRdcr, wsControlRdcr,
+      swgControlRdcr, swgControlRdcr2,
+      wsControlRdcr,
       appMenuRdcr,
       authRdcr, authActions
     } = this.props
@@ -295,6 +296,7 @@ class AppMenuTop extends React.Component {
         >
           <div className={classes.popper}>
             <Typography variant='h6'>WebSocket</Typography>
+            <br />
             <Typography>status: {wsControlRdcr.StatusTxt}</Typography>
             <Divider />
             <Typography variant='caption'>{wsControlRdcr.wsClient.url}</Typography>
@@ -317,9 +319,14 @@ class AppMenuTop extends React.Component {
         >
           <div className={classes.popper}>
             <Typography variant='h6'>OpenAPI</Typography>
+            <br />
             <Typography>status: {swgControlRdcr.StatusTxt}</Typography>
             <Divider />
             <Typography variant='caption'>{swgControlRdcr.swgClient.url}</Typography>
+            <br />
+            <Typography>status: {swgControlRdcr2.StatusTxt}</Typography>
+            <Divider />
+            <Typography variant='caption'>{swgControlRdcr2.swgClient.url}</Typography>
           </div>
         </Popover>
 

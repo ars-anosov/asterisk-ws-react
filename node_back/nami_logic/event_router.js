@@ -10,7 +10,19 @@ const wsTools       = require('../sub_modules/ws_tools')
 const handleEvent = function(data, wsServer) {
 
   logger.debug(data)
-  wsTools.wsBroadcast(wsServer, JSON.stringify(data))
+
+  // Всем
+  //wsTools.wsBroadcast(wsServer, JSON.stringify(data))
+  
+  // Только конкретному WS.nickname
+  if (data.channel) {
+    // 'Channel: SIP/v6-103-0000004d'
+    var extenFromChannel = data.channel.match(/^SIP\/(v\d\-\d+)\-.*/i)
+
+    if (extenFromChannel) { wsTools.wsSendToNickname(wsServer, extenFromChannel[1], JSON.stringify(data)) }
+  }
+
+
 
   switch(data.event) {
 

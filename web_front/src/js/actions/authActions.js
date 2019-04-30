@@ -1,3 +1,5 @@
+import * as wsControlActions         from './wsControlActions'
+
 import {
   AUTH_TOKEN_DISPLAY_BLK,
 
@@ -81,6 +83,13 @@ function clientUserDataGet(swgClient, token) {
             type: AUTH_USER_GET_SUCCESS,
             payload: {'data': res.body}
           })
+
+          // --------------------------------------------------------
+          // Поднимаю WebSocket для этого пользователя
+          // --------------------------------------------------------
+          let wsUrl = window.localStorage.getItem('wsUrl')
+          dispatch(wsControlActions.wsConnectAct(wsUrl, res.body.exten_arr))
+
         }
         if (res.status == '202' && res.body) {
           dispatch({

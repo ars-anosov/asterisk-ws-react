@@ -14,8 +14,6 @@ const initialState = {
   wsClient        : {},
   StatusTxt       : 'Start',
   StatusClass     : 'ws-off',
-
-  msgEvent        : {},
 }
 
 
@@ -36,11 +34,6 @@ export default function wsControlRdcr(state = initialState, action) {
 
     case WSCTL_DISCONNECT_ERR:
       return { ...state, StatusTxt: action.payload.message, StatusClass: 'ws-err' }
-
-
-
-    case WS_MSG_EVENT:
-      return { ...state, msgEvent: action.payload.event }
 
 
 

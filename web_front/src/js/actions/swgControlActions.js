@@ -30,6 +30,9 @@ export function swgConnectAct(specUrl) {
           // Стартовые запросы у компонент после получения swgClient
           // --------------------------------------------------------
           let token = window.localStorage.getItem('token')
+
+          // Получаю данные клиента
+          // В clientUserDataGet зашит WebSocket connect (под данными пользователя)
           dispatch(authActions.clientUserDataGet(client, token))
           
         }

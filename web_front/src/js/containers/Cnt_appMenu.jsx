@@ -9,11 +9,16 @@ import * as wsControlActions    from '../actions/wsControlActions'
 import * as authActions         from '../actions/authActions' 
 
 import * as appMenuActions      from '../actions/appMenuActions' 
+import * as wsPopupActions      from '../actions/wsPopupActions' 
 
 import { withStyles } from '@material-ui/core/styles'
 import withRoot from './withRoot'
 
-import { SwgControl, WsControl, AuthWin, AppMenuTop }  from '../components/asterisk-ws-react-components'
+import {
+  SwgControl, WsControl, AuthWin,
+  AppMenuTop,
+  WsPopup,
+} from '../components/asterisk-ws-react-components'
 
 
 
@@ -40,7 +45,9 @@ class Cnt_appMenu extends React.Component {
       swgControlRdcr2, swgControlActions2,
       wsControlRdcr, wsControlActions,
       authRdcr, authActions,
-      appMenuRdcr, appMenuActions
+      
+      appMenuRdcr, appMenuActions,
+      wsPopupRdcr, wsPopupActions,
     } = this.props
  
     // Всякое намэпленое в результате connect() лежит в this.props
@@ -79,7 +86,7 @@ class Cnt_appMenu extends React.Component {
 
       <WsControl
         headerTxt         ='WS connector'
-        wsUrl             ={wsUrl}        
+        wsUrl             ={wsUrl}
 
         wsControlActions ={wsControlActions}
         wsControlRdcr    ={wsControlRdcr}
@@ -95,11 +102,23 @@ class Cnt_appMenu extends React.Component {
         appMenuActions    ={appMenuActions}
         authActions       ={authActions}
 
-        swgControlRdcr    ={swgControlRdcr}
-        wsControlRdcr    ={wsControlRdcr}
+        swgControlRdcr    ={swgControlRdcr} swgControlRdcr2    ={swgControlRdcr2}
+        wsControlRdcr     ={wsControlRdcr}
 
         appMenuRdcr       ={appMenuRdcr}
         authRdcr          ={authRdcr}
+      />
+
+
+
+      {/* Всплывашка по WebSocket событию от Asterisk */}
+      <WsPopup
+        headerTxt         ='WS popup'
+
+        wsClient          ={wsClient}
+
+        wsPopupActions    ={wsPopupActions}
+        wsPopupRdcr       ={wsPopupRdcr}
       />
 
 
@@ -136,7 +155,7 @@ function mapStateToProps (state) {
   //console.log(state) 
   return { 
     'specUrl':        window.localStorage.getItem('apiUrl')+'/spec/swagger.json',
-    'specUrl2':        window.localStorage.getItem('apiUrl2')+'/spec/swagger.json',
+    'specUrl2':       window.localStorage.getItem('apiUrl2')+'/spec/swagger.json',
     'wsUrl':          window.localStorage.getItem('wsUrl'),
     'swgControlRdcr': state.swgControlRdcr,
     'swgControlRdcr2': state.swgControlRdcr2,
@@ -144,6 +163,7 @@ function mapStateToProps (state) {
     'authRdcr':       state.authRdcr,
 
     'appMenuRdcr':    state.appMenuRdcr,
+    'wsPopupRdcr':    state.wsPopupRdcr,
   } 
 } 
  
@@ -156,6 +176,7 @@ function mapDispatchToProps(dispatch) {
     'authActions':        bindActionCreators(authActions, dispatch),
 
     'appMenuActions':     bindActionCreators(appMenuActions, dispatch),
+    'wsPopupActions':     bindActionCreators(wsPopupActions, dispatch),
   } 
 } 
  

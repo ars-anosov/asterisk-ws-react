@@ -5,6 +5,7 @@ var socket = new WebSocket("ws://192.168.13.97:8019");
 
 socket.onopen = function() {
   console.log("Соединение установлено.");
+  socket.send('["v6-103"]');
 };
 
 socket.onclose = function(event) {
@@ -17,7 +18,7 @@ socket.onclose = function(event) {
 };
 
 socket.onmessage = function(event) {
-  console.log(event.data);
+  console.log( JSON.parse(event.data) );
 };
 
 socket.onerror = function(error) {
