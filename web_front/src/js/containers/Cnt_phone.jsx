@@ -7,6 +7,8 @@ import { connect } from 'react-redux'
 import { withStyles } from '@material-ui/core/styles'
 import withRoot from './withRoot'
 import Grid from '@material-ui/core/Grid'
+import Paper from '@material-ui/core/Paper'
+
 //import {
 //  PaperListItems,
 //} from '../components/asterisk-ws-react-components'
@@ -26,7 +28,11 @@ const styles = theme => ({
   },
   flexGrow1: {
     flexGrow: 1,
-  }
+  },
+  paper: {
+    backgroundColor: theme.palette.background.paper,
+    padding: theme.spacing.unit * 1,
+  },
 })
 
 
@@ -82,6 +88,7 @@ class Cnt_phone extends React.Component {
         >
 
           <Grid item xs={12} sm={12} md={12}>
+            <Paper className={classes.paper}>
             <Typography>
               Твой телефон <strong>{authRdcr.clientUserData.exten_arr}</strong>, SIP-регистрация на <strong>sputnik.intellin-tech.ru</strong><br />
               <br />
@@ -90,6 +97,7 @@ class Cnt_phone extends React.Component {
               <br />
               А тут всплывашки по факту входящего/исходящего вызова на твой телефон :)
             </Typography>
+            </Paper>
           </Grid>
 
         </Grid>

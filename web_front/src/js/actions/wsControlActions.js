@@ -27,9 +27,6 @@ function wsConnectAct(wsUrl, nickname) {
     
     
     socket.onopen = function() {
-      // Первое сообщение будет принято бэкэндом как nickname
-      socket.send(nickname)
-
       dispatch({
         type: WSCTL_CONNECT_SUCCESS,
         payload: {'wsClient': socket, 'message': 'Ok'}
@@ -77,6 +74,28 @@ function wsConnectAct(wsUrl, nickname) {
 
 
 
+function wsSendMsg(socket, msg) {
+  
+  return (dispatch) => {
+    if (socket) {
+      socket.send(msg)
+
+      dispatch({
+        type: WS_MSG_EVENT,
+        payload: {'data': {'msg_sended': msg}}
+      })
+    }
+    else {
+      dispatch({
+        type: WS_MSG_EVENT,
+        payload: {'data': {'msg_not_sended': 'no socket'}}
+      })
+    }
+  }
+
+}
+
+
 
 
 
@@ -85,4 +104,5 @@ function wsConnectAct(wsUrl, nickname) {
 
 export {
   wsConnectAct,
+  wsSendMsg
 }

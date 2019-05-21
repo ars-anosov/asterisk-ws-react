@@ -25,7 +25,7 @@ const styles = theme => ({
   },
   flexGrow1: {
     flexGrow: 1,
-  }
+  },
 })
 
 

@@ -7,6 +7,7 @@ import { connect } from 'react-redux'
 import { withStyles } from '@material-ui/core/styles'
 import withRoot from './withRoot'
 import Grid from '@material-ui/core/Grid'
+
 //import {
 //  PaperListItems,
 //} from '../components/asterisk-ws-react-components'
@@ -82,8 +83,12 @@ class Cnt_monit extends React.Component {
         >
 
           <Grid item xs={12} sm={12} md={12}>
-            <HostConfig swgClient={swgControlRdcr2.swgClient} headerTxt='HostConfig component' />
-            <HostGraph swgClient={swgControlRdcr2.swgClient} headerTxt='HostGraph component' />
+            <HostGraph swgClient={swgControlRdcr2.swgClient} headerTxt='Логические связи по разным уровням модели OSI' />
+            <HostConfig swgClient={swgControlRdcr2.swgClient} headerTxt='Zabbix Host' />
+            
+            <pre>
+              Мета-информацию о логических связях храню в Zabbix: <a href='http://zabbix.intellin-tech.ru/hostinventories.php?ddreset=1'>Host inventory</a> (Notes)
+            </pre>
           </Grid>
 
         </Grid>
@@ -108,11 +113,11 @@ class Cnt_monit extends React.Component {
 function mapStateToProps (state) { 
   //console.log(state) 
   return {
-    'swgControlRdcr2'    : state.swgControlRdcr2, // это надо чтобы обращаться к Swagger (нужен объект swgClient)
-    'authRdcr'          : state.authRdcr,       // это надо чтобы проверять авторизован ли пользователь (показано ли окно authRdcr.displayBlock = true)
+    'swgControlRdcr2'     : state.swgControlRdcr2, // это надо чтобы обращаться к Swagger (нужен объект swgClient)
+    'authRdcr'            : state.authRdcr,       // это надо чтобы проверять авторизован ли пользователь (показано ли окно authRdcr.displayBlock = true)
 
     //'hdRdcr'            : state.hdRdcr,
-    'appMenuRdcr'       : state.appMenuRdcr
+    'appMenuRdcr'         : state.appMenuRdcr
   } 
 } 
  

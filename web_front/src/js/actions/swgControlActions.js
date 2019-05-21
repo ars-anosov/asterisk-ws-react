@@ -31,9 +31,19 @@ export function swgConnectAct(specUrl) {
           // --------------------------------------------------------
           let token = window.localStorage.getItem('token')
 
-          // Получаю данные клиента
-          // В clientUserDataGet зашит WebSocket connect (под данными пользователя)
+          // Получаю данные пользователя
           dispatch(authActions.clientUserDataGet(client, token))
+
+          // Постоянно обновляю данные пользователя
+          /*
+          setInterval(
+            () => {
+              console.log(wsClient)
+              dispatch(authActions.clientUserDataGet(client, token))
+            },
+            10000
+          )
+          */
           
         }
       )

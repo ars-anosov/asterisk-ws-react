@@ -1,5 +1,4 @@
 import OpenApiSwagger           from 'swagger-client'
-import * as authActions         from './authActions'
 
 import {
   SWGCTL2_CONNECT_REQUEST,

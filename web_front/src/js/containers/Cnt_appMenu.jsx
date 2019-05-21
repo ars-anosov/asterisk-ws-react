@@ -70,7 +70,7 @@ class Cnt_appMenu extends React.Component {
       {/* Самостоятельные компоненты (прибиты position:absolute) */}
       <SwgControl
         headerTxt         ='API connector'
-        specUrl           ={specUrl}        
+        specUrl           ={specUrl}
 
         swgControlActions ={swgControlActions}
         swgControlRdcr    ={swgControlRdcr}
@@ -88,9 +88,12 @@ class Cnt_appMenu extends React.Component {
         headerTxt         ='WS connector'
         wsUrl             ={wsUrl}
 
-        wsControlActions ={wsControlActions}
-        wsControlRdcr    ={wsControlRdcr}
+        wsControlActions  ={wsControlActions}
+        wsControlRdcr     ={wsControlRdcr}
+
+        nickname          ={authRdcr.clientUserData.exten_arr}
       />
+      {/* Первое сообщение в сторону WS-сервера воспринимается как nickname */}
 
 
 

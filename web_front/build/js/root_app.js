@@ -89775,11 +89775,7 @@ exports.authTokenAct = authTokenAct;
 exports.clientUserDataGet = clientUserDataGet;
 exports.handleChangeData = handleChangeData;
 
-var wsControlActions = _interopRequireWildcard(require("./wsControlActions"));
-
 var _authConst = require("../constants/authConst");
-
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = Object.defineProperty && Object.getOwnPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : {}; if (desc.get || desc.set) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj["default"] = obj; return newObj; } }
 
 function authTokenAct(swgClient, authName, authPass) {
   return function (dispatch) {
@@ -89854,12 +89850,7 @@ function clientUserDataGet(swgClient, token) {
             payload: {
               'data': res.body
             }
-          }); // --------------------------------------------------------
-          // Поднимаю WebSocket для этого пользователя
-          // --------------------------------------------------------
-
-          var wsUrl = window.localStorage.getItem('wsUrl');
-          dispatch(wsControlActions.wsConnectAct(wsUrl, res.body.exten_arr));
+          });
         }
 
         if (res.status == '202' && res.body) {
@@ -89905,7 +89896,7 @@ function handleChangeData(event) {
   };
 }
 
-},{"../constants/authConst":737,"./wsControlActions":718}],715:[function(require,module,exports){
+},{"../constants/authConst":737}],715:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -90012,10 +90003,19 @@ function swgConnectAct(specUrl) {
       // Стартовые запросы у компонент после получения swgClient
       // --------------------------------------------------------
 
-      var token = window.localStorage.getItem('token'); // Получаю данные клиента
-      // В clientUserDataGet зашит WebSocket connect (под данными пользователя)
+      var token = window.localStorage.getItem('token'); // Получаю данные пользователя
 
-      dispatch(authActions.clientUserDataGet(client, token));
+      dispatch(authActions.clientUserDataGet(client, token)); // Постоянно обновляю данные пользователя
+
+      /*
+      setInterval(
+        () => {
+          console.log(wsClient)
+          dispatch(authActions.clientUserDataGet(client, token))
+        },
+        10000
+      )
+      */
     })["catch"](function (err) {
       // err
       console.log(err);
@@ -90033,11 +90033,7 @@ exports.swgConnectAct = swgConnectAct;
 
 var _swaggerClient = _interopRequireDefault(require("swagger-client"));
 
-var authActions = _interopRequireWildcard(require("./authActions"));
-
 var _swgControlConst = require("../constants/swgControlConst2");
-
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = Object.defineProperty && Object.getOwnPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : {}; if (desc.get || desc.set) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj["default"] = obj; return newObj; } }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
@@ -90071,13 +90067,14 @@ function swgConnectAct(specUrl) {
   };
 }
 
-},{"../constants/swgControlConst2":740,"./authActions":714,"swagger-client":695}],718:[function(require,module,exports){
+},{"../constants/swgControlConst2":740,"swagger-client":695}],718:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.wsConnectAct = wsConnectAct;
+exports.wsSendMsg = wsSendMsg;
 
 var _wsControlConst = require("../constants/wsControlConst");
 
@@ -90094,8 +90091,6 @@ function wsConnectAct(wsUrl, nickname) {
     var socket = new WebSocket("ws://192.168.13.97:8019");
 
     socket.onopen = function () {
-      // Первое сообщение будет принято бэкэндом как nickname
-      socket.send(nickname);
       dispatch({
         type: _wsControlConst.WSCTL_CONNECT_SUCCESS,
         payload: {
@@ -90138,6 +90133,31 @@ function wsConnectAct(wsUrl, nickname) {
     }
     */
 
+  };
+}
+
+function wsSendMsg(socket, msg) {
+  return function (dispatch) {
+    if (socket) {
+      socket.send(msg);
+      dispatch({
+        type: _wsControlConst.WS_MSG_EVENT,
+        payload: {
+          'data': {
+            'msg_sended': msg
+          }
+        }
+      });
+    } else {
+      dispatch({
+        type: _wsControlConst.WS_MSG_EVENT,
+        payload: {
+          'data': {
+            'msg_not_sended': 'no socket'
+          }
+        }
+      });
+    }
   };
 }
 
@@ -90521,7 +90541,7 @@ function (_React$Component) {
         className: classes.popper
       }, _react["default"].createElement(_Typography["default"], {
         variant: "h6"
-      }, "WebSocket"), _react["default"].createElement("br", null), _react["default"].createElement(_Typography["default"], null, "status: ", wsControlRdcr.StatusTxt), _react["default"].createElement(_Divider["default"], null), _react["default"].createElement(_Typography["default"], {
+      }, "WebSocket"), _react["default"].createElement("br", null), _react["default"].createElement(_Typography["default"], null, "Main service WS: ", wsControlRdcr.StatusTxt), _react["default"].createElement(_Divider["default"], null), _react["default"].createElement(_Typography["default"], {
         variant: "caption"
       }, wsControlRdcr.wsClient.url))), _react["default"].createElement(_Popover["default"], {
         id: "api_status",
@@ -90540,9 +90560,9 @@ function (_React$Component) {
         className: classes.popper
       }, _react["default"].createElement(_Typography["default"], {
         variant: "h6"
-      }, "OpenAPI"), _react["default"].createElement("br", null), _react["default"].createElement(_Typography["default"], null, "status: ", swgControlRdcr.StatusTxt), _react["default"].createElement(_Divider["default"], null), _react["default"].createElement(_Typography["default"], {
+      }, "OpenAPI"), _react["default"].createElement("br", null), _react["default"].createElement(_Typography["default"], null, "Main service API: ", swgControlRdcr.StatusTxt), _react["default"].createElement(_Divider["default"], null), _react["default"].createElement(_Typography["default"], {
         variant: "caption"
-      }, swgControlRdcr.swgClient.url), _react["default"].createElement("br", null), _react["default"].createElement(_Typography["default"], null, "status: ", swgControlRdcr2.StatusTxt), _react["default"].createElement(_Divider["default"], null), _react["default"].createElement(_Typography["default"], {
+      }, swgControlRdcr.swgClient.url), _react["default"].createElement("br", null), _react["default"].createElement(_Typography["default"], null, "Zabbix service API: ", swgControlRdcr2.StatusTxt), _react["default"].createElement(_Divider["default"], null), _react["default"].createElement(_Typography["default"], {
         variant: "caption"
       }, swgControlRdcr2.swgClient.url))));
     }
@@ -91000,15 +91020,6 @@ function (_React$Component) {
     if (Object.keys(_this.props.swgControlRdcr.swgClient).length === 0) {
       _this.props.swgControlActions.swgConnectAct(_this.props.specUrl);
     }
-    /*
-    setInterval(
-      () => {
-        this.props.swgControlActions.swgConnectAct(this.props.specUrl)
-      },
-      10000
-    )
-    */
-
 
     return _this;
   }
@@ -91072,16 +91083,25 @@ function (_React$Component) {
   _inherits(WsControl, _React$Component);
 
   function WsControl(args) {
+    var _this;
+
     _classCallCheck(this, WsControl);
 
-    return _possibleConstructorReturn(this, _getPrototypeOf(WsControl).call(this, args)); // Если еще нет wsClient то получаем его
-    // Перетащил в AuthActions.js-clientUserDataGet
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(WsControl).call(this, args)); // Если еще нет wsClient то получаем его
 
-    /*
-    if ( Object.keys(this.props.wsControlRdcr.wsClient).length === 0 ) {
-      this.props.wsControlActions.wsConnectAct(this.props.wsUrl)
-    }
-    */
+    if (Object.keys(_this.props.wsControlRdcr.wsClient).length === 0) {
+      _this.props.wsControlActions.wsConnectAct(_this.props.wsUrl, _this.props.nickname);
+    } // Как только появится this.props.nickname --> отсылаем nickname по WS
+
+
+    var nickInterval = setInterval(function () {
+      if (_this.props.nickname) {
+        _this.props.wsControlActions.wsSendMsg(_this.props.wsControlRdcr.wsClient, _this.props.nickname);
+
+        clearInterval(nickInterval);
+      }
+    }, 1000);
+    return _this;
   }
 
   _createClass(WsControl, [{
@@ -91478,7 +91498,8 @@ function (_React$Component) {
         headerTxt: "WS connector",
         wsUrl: wsUrl,
         wsControlActions: wsControlActions,
-        wsControlRdcr: wsControlRdcr
+        wsControlRdcr: wsControlRdcr,
+        nickname: authRdcr.clientUserData.exten_arr
       }), _react["default"].createElement(_asteriskWsReactComponents.AppMenuTop, {
         headerTxt: "Start",
         swgClient: swgClient,
@@ -91855,13 +91876,15 @@ function (_React$Component) {
         xs: 12,
         sm: 12,
         md: 12
-      }, _react["default"].createElement(_zabbixReactComponent.HostConfig, {
+      }, _react["default"].createElement(_zabbixReactComponent.HostGraph, {
         swgClient: swgControlRdcr2.swgClient,
-        headerTxt: "HostConfig component"
-      }), _react["default"].createElement(_zabbixReactComponent.HostGraph, {
+        headerTxt: "\u041B\u043E\u0433\u0438\u0447\u0435\u0441\u043A\u0438\u0435 \u0441\u0432\u044F\u0437\u0438 \u043F\u043E \u0440\u0430\u0437\u043D\u044B\u043C \u0443\u0440\u043E\u0432\u043D\u044F\u043C \u043C\u043E\u0434\u0435\u043B\u0438 OSI"
+      }), _react["default"].createElement(_zabbixReactComponent.HostConfig, {
         swgClient: swgControlRdcr2.swgClient,
-        headerTxt: "HostGraph component"
-      }))) : _react["default"].createElement("div", null));
+        headerTxt: "Zabbix Host"
+      }), _react["default"].createElement("pre", null, "\u041C\u0435\u0442\u0430-\u0438\u043D\u0444\u043E\u0440\u043C\u0430\u0446\u0438\u044E \u043E \u043B\u043E\u0433\u0438\u0447\u0435\u0441\u043A\u0438\u0445 \u0441\u0432\u044F\u0437\u044F\u0445 \u0445\u0440\u0430\u043D\u044E \u0432 Zabbix: ", _react["default"].createElement("a", {
+        href: "http://zabbix.intellin-tech.ru/hostinventories.php?ddreset=1"
+      }, "Host inventory"), " (Notes)"))) : _react["default"].createElement("div", null));
     }
   }]);
 
@@ -91913,6 +91936,8 @@ var _withRoot = _interopRequireDefault(require("./withRoot"));
 
 var _Grid = _interopRequireDefault(require("@material-ui/core/Grid"));
 
+var _Paper = _interopRequireDefault(require("@material-ui/core/Paper"));
+
 var _Typography = _interopRequireDefault(require("@material-ui/core/Typography"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
@@ -91948,6 +91973,10 @@ var styles = function styles(theme) {
     },
     flexGrow1: {
       flexGrow: 1
+    },
+    paper: {
+      backgroundColor: theme.palette.background.paper,
+      padding: theme.spacing.unit * 1
     }
   };
 };
@@ -92012,9 +92041,11 @@ function (_React$Component) {
         xs: 12,
         sm: 12,
         md: 12
+      }, _react["default"].createElement(_Paper["default"], {
+        className: classes.paper
       }, _react["default"].createElement(_Typography["default"], null, "\u0422\u0432\u043E\u0439 \u0442\u0435\u043B\u0435\u0444\u043E\u043D ", _react["default"].createElement("strong", null, authRdcr.clientUserData.exten_arr), ", SIP-\u0440\u0435\u0433\u0438\u0441\u0442\u0440\u0430\u0446\u0438\u044F \u043D\u0430 ", _react["default"].createElement("strong", null, "sputnik.intellin-tech.ru"), _react["default"].createElement("br", null), _react["default"].createElement("br", null), "\u041E\u043D \u0436\u0438\u0432\u0435\u0442 \u043D\u0430 \u0432\u0438\u0440\u0442\u0443\u0430\u043B\u044C\u043D\u043E\u0439 \u0410\u0422\u0421 \u21166 - ", _react["default"].createElement("a", {
         href: "https://office.intellin-tech.ru/sputnik/"
-      }, _react["default"].createElement("strong", null, "WEB-\u0430\u0434\u043C\u0438\u043D\u043A\u0430")), " (\u043B\u043E\u0433\u0438\u043D/\u043F\u0430\u0440\u043E\u043B\u044C: virtual6/virtual6)", _react["default"].createElement("br", null), "\u041F\u043E \u0441\u0441\u044B\u043B\u043A\u0435 \u0432\u0441\u0435 \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438: \u0434\u0430\u043D\u043D\u044B\u0435 SIP-\u0440\u0435\u0433\u0438\u0441\u0442\u0440\u0430\u0446\u0438\u0438, \u043C\u0430\u0440\u0448\u0440\u0443\u0442\u0438\u0437\u0430\u0439\u0438\u044F, \u0410\u041E\u041D \u0438 \u0442.\u043F.", _react["default"].createElement("br", null), _react["default"].createElement("br", null), "\u0410 \u0442\u0443\u0442 \u0432\u0441\u043F\u043B\u044B\u0432\u0430\u0448\u043A\u0438 \u043F\u043E \u0444\u0430\u043A\u0442\u0443 \u0432\u0445\u043E\u0434\u044F\u0449\u0435\u0433\u043E/\u0438\u0441\u0445\u043E\u0434\u044F\u0449\u0435\u0433\u043E \u0432\u044B\u0437\u043E\u0432\u0430 \u043D\u0430 \u0442\u0432\u043E\u0439 \u0442\u0435\u043B\u0435\u0444\u043E\u043D :)"))) : _react["default"].createElement("div", null));
+      }, _react["default"].createElement("strong", null, "WEB-\u0430\u0434\u043C\u0438\u043D\u043A\u0430")), " (\u043B\u043E\u0433\u0438\u043D/\u043F\u0430\u0440\u043E\u043B\u044C: virtual6/virtual6)", _react["default"].createElement("br", null), "\u041F\u043E \u0441\u0441\u044B\u043B\u043A\u0435 \u0432\u0441\u0435 \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438: \u0434\u0430\u043D\u043D\u044B\u0435 SIP-\u0440\u0435\u0433\u0438\u0441\u0442\u0440\u0430\u0446\u0438\u0438, \u043C\u0430\u0440\u0448\u0440\u0443\u0442\u0438\u0437\u0430\u0439\u0438\u044F, \u0410\u041E\u041D \u0438 \u0442.\u043F.", _react["default"].createElement("br", null), _react["default"].createElement("br", null), "\u0410 \u0442\u0443\u0442 \u0432\u0441\u043F\u043B\u044B\u0432\u0430\u0448\u043A\u0438 \u043F\u043E \u0444\u0430\u043A\u0442\u0443 \u0432\u0445\u043E\u0434\u044F\u0449\u0435\u0433\u043E/\u0438\u0441\u0445\u043E\u0434\u044F\u0449\u0435\u0433\u043E \u0432\u044B\u0437\u043E\u0432\u0430 \u043D\u0430 \u0442\u0432\u043E\u0439 \u0442\u0435\u043B\u0435\u0444\u043E\u043D :)")))) : _react["default"].createElement("div", null));
     }
   }]);
 
@@ -92046,7 +92077,7 @@ var _default = (0, _reactRedux.connect)(mapStateToProps, mapDispatchToProps)((0,
 
 exports["default"] = _default;
 
-},{"./withRoot":747,"@material-ui/core/Grid":81,"@material-ui/core/Typography":124,"@material-ui/core/styles":142,"react":663,"react-redux":649,"redux":683}],747:[function(require,module,exports){
+},{"./withRoot":747,"@material-ui/core/Grid":81,"@material-ui/core/Paper":110,"@material-ui/core/Typography":124,"@material-ui/core/styles":142,"react":663,"react-redux":649,"redux":683}],747:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {

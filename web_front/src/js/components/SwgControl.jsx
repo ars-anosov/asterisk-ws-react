@@ -10,15 +10,6 @@ class SwgControl extends React.Component {
       this.props.swgControlActions.swgConnectAct(this.props.specUrl)
     }
 
-    /*
-    setInterval(
-      () => {
-        this.props.swgControlActions.swgConnectAct(this.props.specUrl)
-      },
-      10000
-    )
-    */
-
   }
 
 

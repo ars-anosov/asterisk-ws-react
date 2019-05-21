@@ -297,7 +297,7 @@ class AppMenuTop extends React.Component {
           <div className={classes.popper}>
             <Typography variant='h6'>WebSocket</Typography>
             <br />
-            <Typography>status: {wsControlRdcr.StatusTxt}</Typography>
+            <Typography>Main service WS: {wsControlRdcr.StatusTxt}</Typography>
             <Divider />
             <Typography variant='caption'>{wsControlRdcr.wsClient.url}</Typography>
           </div>
@@ -320,11 +320,11 @@ class AppMenuTop extends React.Component {
           <div className={classes.popper}>
             <Typography variant='h6'>OpenAPI</Typography>
             <br />
-            <Typography>status: {swgControlRdcr.StatusTxt}</Typography>
+            <Typography>Main service API: {swgControlRdcr.StatusTxt}</Typography>
             <Divider />
             <Typography variant='caption'>{swgControlRdcr.swgClient.url}</Typography>
             <br />
-            <Typography>status: {swgControlRdcr2.StatusTxt}</Typography>
+            <Typography>Zabbix service API: {swgControlRdcr2.StatusTxt}</Typography>
             <Divider />
             <Typography variant='caption'>{swgControlRdcr2.swgClient.url}</Typography>
           </div>
