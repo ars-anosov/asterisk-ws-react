@@ -8,6 +8,7 @@ import { withStyles } from '@material-ui/core/styles'
 import withRoot from './withRoot'
 import Grid from '@material-ui/core/Grid'
 import Paper from '@material-ui/core/Paper'
+import Button from '@material-ui/core/Button'
 
 //import {
 //  PaperListItems,
@@ -42,11 +43,63 @@ class Cnt_phone extends React.Component {
     super(args)
 
     this.alertFunc    = this.alertFunc.bind(this)
+
+    this.injectBlockly    = this.injectBlockly.bind(this)
+    this.showCode         = this.showCode.bind(this)
+    this.runCode          = this.runCode.bind(this)
+    this.demoWorkspace    = ''
   }
 
   alertFunc(event) {
     alert('Работа с ТТ. Потом сделаю как-нибудь...')
   }
+
+
+
+  // Blockly ---
+  injectBlockly() {
+
+    document.getElementById('blocklyDiv').innerHTML = ''
+
+    this.demoWorkspace = Blockly.inject(
+      'blocklyDiv',
+      {
+        media     : 'blockly12/media/',
+        toolbox   : document.getElementById('toolbox')
+      }
+    )
+
+    Blockly.Xml.domToWorkspace(
+      document.getElementById('startBlocks'),
+      this.demoWorkspace
+    )
+  }
+
+  showCode() {
+    // Generate JavaScript code and display it.
+    Blockly.JavaScript.INFINITE_LOOP_TRAP = null;
+    var code = Blockly.JavaScript.workspaceToCode(this.demoWorkspace)
+    alert(code);
+  }
+
+  runCode() {
+    // Generate JavaScript code and run it.
+    window.LoopTrap = 1000;
+    Blockly.JavaScript.INFINITE_LOOP_TRAP =
+        'if (--window.LoopTrap == 0) throw "Infinite loop.";\n';
+    var code = Blockly.JavaScript.workspaceToCode(this.demoWorkspace)
+    Blockly.JavaScript.INFINITE_LOOP_TRAP = null
+    
+    try {
+      eval(code)
+    } catch (e) {
+      alert(e)
+    
+    }
+  }
+  // END OF Blockly ---
+
+
 
 
   render() { 
@@ -89,14 +142,19 @@ class Cnt_phone extends React.Component {
 
           <Grid item xs={12} sm={12} md={12}>
             <Paper className={classes.paper}>
-            <Typography>
-              Твой телефон <strong>{authRdcr.clientUserData.exten_arr}</strong>, SIP-регистрация на <strong>sputnik.intellin-tech.ru</strong><br />
+              <Typography>
+                Твой телефон <strong>{authRdcr.clientUserData.exten_arr}</strong><br />
+                Он живет на <strong>sputnik.intellin-tech.ru</strong>, виртуальная АТС №6<br />
+                <a href='https://office.intellin-tech.ru/sputnik/'><strong>WEB-админка</strong></a> (логин/пароль: virtual6/virtual6)<br />
+              </Typography>
               <br />
-              Он живет на виртуальной АТС №6 - <a href='https://office.intellin-tech.ru/sputnik/'><strong>WEB-админка</strong></a> (логин/пароль: virtual6/virtual6)<br />
-              По ссылке все настройки: данные SIP-регистрации, маршрутизайия, АОН и т.п.<br />
+              <Button variant="contained" color='primary' onClick={this.injectBlockly}>Показать текущую логику обработки вызова</Button>
               <br />
-              А тут всплывашки по факту входящего/исходящего вызова на твой телефон :)
-            </Typography>
+              <div id="blocklyDiv" style={{height: '800px', width: '1600px'}}></div>
+              <br />
+              <button onClick={this.showCode}>Код который выполнит АТС</button><br />
+              <button onClick={this.runCode}>Пезультат логической цепочки</button><br />
+
             </Paper>
           </Grid>
 

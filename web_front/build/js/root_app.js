@@ -91938,6 +91938,8 @@ var _Grid = _interopRequireDefault(require("@material-ui/core/Grid"));
 
 var _Paper = _interopRequireDefault(require("@material-ui/core/Paper"));
 
+var _Button = _interopRequireDefault(require("@material-ui/core/Button"));
+
 var _Typography = _interopRequireDefault(require("@material-ui/core/Typography"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
@@ -91993,6 +91995,10 @@ function (_React$Component) {
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(Cnt_phone).call(this, args));
     _this.alertFunc = _this.alertFunc.bind(_assertThisInitialized(_this));
+    _this.injectBlockly = _this.injectBlockly.bind(_assertThisInitialized(_this));
+    _this.showCode = _this.showCode.bind(_assertThisInitialized(_this));
+    _this.runCode = _this.runCode.bind(_assertThisInitialized(_this));
+    _this.demoWorkspace = '';
     return _this;
   }
 
@@ -92000,7 +92006,42 @@ function (_React$Component) {
     key: "alertFunc",
     value: function alertFunc(event) {
       alert('Работа с ТТ. Потом сделаю как-нибудь...');
+    } // Blockly ---
+
+  }, {
+    key: "injectBlockly",
+    value: function injectBlockly() {
+      document.getElementById('blocklyDiv').innerHTML = '';
+      this.demoWorkspace = Blockly.inject('blocklyDiv', {
+        media: 'blockly12/media/',
+        toolbox: document.getElementById('toolbox')
+      });
+      Blockly.Xml.domToWorkspace(document.getElementById('startBlocks'), this.demoWorkspace);
     }
+  }, {
+    key: "showCode",
+    value: function showCode() {
+      // Generate JavaScript code and display it.
+      Blockly.JavaScript.INFINITE_LOOP_TRAP = null;
+      var code = Blockly.JavaScript.workspaceToCode(this.demoWorkspace);
+      alert(code);
+    }
+  }, {
+    key: "runCode",
+    value: function runCode() {
+      // Generate JavaScript code and run it.
+      window.LoopTrap = 1000;
+      Blockly.JavaScript.INFINITE_LOOP_TRAP = 'if (--window.LoopTrap == 0) throw "Infinite loop.";\n';
+      var code = Blockly.JavaScript.workspaceToCode(this.demoWorkspace);
+      Blockly.JavaScript.INFINITE_LOOP_TRAP = null;
+
+      try {
+        eval(code);
+      } catch (e) {
+        alert(e);
+      }
+    } // END OF Blockly ---
+
   }, {
     key: "render",
     value: function render() {
@@ -92043,9 +92084,23 @@ function (_React$Component) {
         md: 12
       }, _react["default"].createElement(_Paper["default"], {
         className: classes.paper
-      }, _react["default"].createElement(_Typography["default"], null, "\u0422\u0432\u043E\u0439 \u0442\u0435\u043B\u0435\u0444\u043E\u043D ", _react["default"].createElement("strong", null, authRdcr.clientUserData.exten_arr), ", SIP-\u0440\u0435\u0433\u0438\u0441\u0442\u0440\u0430\u0446\u0438\u044F \u043D\u0430 ", _react["default"].createElement("strong", null, "sputnik.intellin-tech.ru"), _react["default"].createElement("br", null), _react["default"].createElement("br", null), "\u041E\u043D \u0436\u0438\u0432\u0435\u0442 \u043D\u0430 \u0432\u0438\u0440\u0442\u0443\u0430\u043B\u044C\u043D\u043E\u0439 \u0410\u0422\u0421 \u21166 - ", _react["default"].createElement("a", {
+      }, _react["default"].createElement(_Typography["default"], null, "\u0422\u0432\u043E\u0439 \u0442\u0435\u043B\u0435\u0444\u043E\u043D ", _react["default"].createElement("strong", null, authRdcr.clientUserData.exten_arr), _react["default"].createElement("br", null), "\u041E\u043D \u0436\u0438\u0432\u0435\u0442 \u043D\u0430 ", _react["default"].createElement("strong", null, "sputnik.intellin-tech.ru"), ", \u0432\u0438\u0440\u0442\u0443\u0430\u043B\u044C\u043D\u0430\u044F \u0410\u0422\u0421 \u21166", _react["default"].createElement("br", null), _react["default"].createElement("a", {
         href: "https://office.intellin-tech.ru/sputnik/"
-      }, _react["default"].createElement("strong", null, "WEB-\u0430\u0434\u043C\u0438\u043D\u043A\u0430")), " (\u043B\u043E\u0433\u0438\u043D/\u043F\u0430\u0440\u043E\u043B\u044C: virtual6/virtual6)", _react["default"].createElement("br", null), "\u041F\u043E \u0441\u0441\u044B\u043B\u043A\u0435 \u0432\u0441\u0435 \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438: \u0434\u0430\u043D\u043D\u044B\u0435 SIP-\u0440\u0435\u0433\u0438\u0441\u0442\u0440\u0430\u0446\u0438\u0438, \u043C\u0430\u0440\u0448\u0440\u0443\u0442\u0438\u0437\u0430\u0439\u0438\u044F, \u0410\u041E\u041D \u0438 \u0442.\u043F.", _react["default"].createElement("br", null), _react["default"].createElement("br", null), "\u0410 \u0442\u0443\u0442 \u0432\u0441\u043F\u043B\u044B\u0432\u0430\u0448\u043A\u0438 \u043F\u043E \u0444\u0430\u043A\u0442\u0443 \u0432\u0445\u043E\u0434\u044F\u0449\u0435\u0433\u043E/\u0438\u0441\u0445\u043E\u0434\u044F\u0449\u0435\u0433\u043E \u0432\u044B\u0437\u043E\u0432\u0430 \u043D\u0430 \u0442\u0432\u043E\u0439 \u0442\u0435\u043B\u0435\u0444\u043E\u043D :)")))) : _react["default"].createElement("div", null));
+      }, _react["default"].createElement("strong", null, "WEB-\u0430\u0434\u043C\u0438\u043D\u043A\u0430")), " (\u043B\u043E\u0433\u0438\u043D/\u043F\u0430\u0440\u043E\u043B\u044C: virtual6/virtual6)", _react["default"].createElement("br", null)), _react["default"].createElement("br", null), _react["default"].createElement(_Button["default"], {
+        variant: "contained",
+        color: "primary",
+        onClick: this.injectBlockly
+      }, "\u041F\u043E\u043A\u0430\u0437\u0430\u0442\u044C \u0442\u0435\u043A\u0443\u0449\u0443\u044E \u043B\u043E\u0433\u0438\u043A\u0443 \u043E\u0431\u0440\u0430\u0431\u043E\u0442\u043A\u0438 \u0432\u044B\u0437\u043E\u0432\u0430"), _react["default"].createElement("br", null), _react["default"].createElement("div", {
+        id: "blocklyDiv",
+        style: {
+          height: '800px',
+          width: '1600px'
+        }
+      }), _react["default"].createElement("br", null), _react["default"].createElement("button", {
+        onClick: this.showCode
+      }, "\u041A\u043E\u0434 \u043A\u043E\u0442\u043E\u0440\u044B\u0439 \u0432\u044B\u043F\u043E\u043B\u043D\u0438\u0442 \u0410\u0422\u0421"), _react["default"].createElement("br", null), _react["default"].createElement("button", {
+        onClick: this.runCode
+      }, "\u041F\u0435\u0437\u0443\u043B\u044C\u0442\u0430\u0442 \u043B\u043E\u0433\u0438\u0447\u0435\u0441\u043A\u043E\u0439 \u0446\u0435\u043F\u043E\u0447\u043A\u0438"), _react["default"].createElement("br", null)))) : _react["default"].createElement("div", null));
     }
   }]);
 
@@ -92077,7 +92132,7 @@ var _default = (0, _reactRedux.connect)(mapStateToProps, mapDispatchToProps)((0,
 
 exports["default"] = _default;
 
-},{"./withRoot":747,"@material-ui/core/Grid":81,"@material-ui/core/Paper":110,"@material-ui/core/Typography":124,"@material-ui/core/styles":142,"react":663,"react-redux":649,"redux":683}],747:[function(require,module,exports){
+},{"./withRoot":747,"@material-ui/core/Button":58,"@material-ui/core/Grid":81,"@material-ui/core/Paper":110,"@material-ui/core/Typography":124,"@material-ui/core/styles":142,"react":663,"react-redux":649,"redux":683}],747:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {

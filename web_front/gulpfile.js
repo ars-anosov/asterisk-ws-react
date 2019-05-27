@@ -41,21 +41,24 @@ var path = {
       jsx:        ['root_app.jsx'],
       scss:       'src/style/*.*css',
       img:        'src/img/**/*.*',
-      fonts:      'src/fonts/**/*.*'
+      fonts:      'src/fonts/**/*.*',
+      blockly:    'src/blockly12/**/*.*',
     },
     build: {
       html:       'build/',
       js:         'build/js/',
       css:        'build/css/',
       img:        'build/img/',
-      fonts:      'build/fonts/'
+      fonts:      'build/fonts/',
+      blockly:    'build/blockly12/',
     },
     watch: {
       html:       ['src/*.html', 'src/templates/*.html'],
       jsx:        ['src/js/*.js*', 'src/js/components/*.js*', 'src/js/containers/*.js*', 'src/js/reducers/*.js*', 'src/js/store/*.js*', 'src/js/actions/*.js*', 'src/js/constants/*.js*', 'src/js/enhancers/*.js*'],
       scss:       ['src/style/**/*.*css'],
       img:        ['src/img/**/*.*'],
-      fonts:      ['src/fonts/**/*.*']
+      fonts:      ['src/fonts/**/*.*'],
+      blockly:    ['src/blockly12/**/*.*'],
     },
     clean:          'build/*',
 }
@@ -87,12 +90,14 @@ gulp.task('html:build', (cb) => {
 
 gulp.task('jsx:build', (cb) => {
   // .js files (vanila js) if exists
+  /*
   gulp.src(path.src.js+'*.js') 
     .pipe( rigger() ) 
     .pipe( gulpif( buildFlag.sourcemap, sourcemaps.init({loadMaps: true}) ) ) 
     .pipe( terser() ) 
     .pipe( gulpif( buildFlag.sourcemap, sourcemaps.write('./maps') ) ) 
-    .pipe( gulp.dest(path.build.js) );
+    .pipe( gulp.dest(path.build.js) )
+  */
 
   // .jsx (ES6 and JSX)
   path.src.jsx.map ( (row, i) => {
@@ -144,6 +149,11 @@ gulp.task('fonts:build', (cb) => {
   cb()
 })
 
+gulp.task('blockly:build', (cb) => {
+  gulp.src(path.src.blockly)
+    .pipe(gulp.dest(path.build.blockly))
+  cb()
+})
 
 
 
@@ -158,7 +168,8 @@ gulp.task('build', gulp.parallel(
   'jsx:build',
   'scss:build',
   'fonts:build',
-  'image:build'
+  'image:build',
+  'blockly:build'
 ))
 
 gulp.task('default', gulp.series(
@@ -178,5 +189,6 @@ gulp.watch(path.watch.html,  gulp.series('html:build'))
 gulp.watch(path.watch.scss,  gulp.series('scss:build'))
 gulp.watch(path.watch.jsx,   gulp.series('jsx:build'))
 gulp.watch(path.watch.img,   gulp.series('image:build'))
-gulp.watch(path.watch.fonts, gulp.series('html:build'))
-gulp.watch(path.watch.html,  gulp.series('fonts:build'))
+gulp.watch(path.watch.fonts, gulp.series('fonts:build'))
+gulp.watch(path.watch.html,  gulp.series('html:build'))
+gulp.watch(path.watch.blockly, gulp.series('blockly:build'))

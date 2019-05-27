@@ -15,6 +15,8 @@
     You need to enable JavaScript to run this app.
   </noscript>
 
+
+
   <div id="root" class="App"></div>
   <script>
     window.localStorage.setItem('apiUrl', 'http://192.168.13.97:8018')
@@ -22,6 +24,97 @@
     window.localStorage.setItem('wsUrl', 'ws://192.168.13.97:8019')
   </script>
   <script src="js/root_app.js"></script>
+
+
+
+  <!-- https://developers.google.com/blockly/guides/get-started/web -->
+  <script src="blockly12/blockly_compressed.js"></script>
+  <script src="blockly12/blocks_compressed.js"></script>
+  <script src="blockly12/javascript_compressed.js"></script>
+  <script src="blockly12/msg/js/ru.js"></script>
+
+  <xml id="toolbox" style="display: none">
+    <category name="Логические" colour="%{BKY_LOGIC_HUE}">
+      <block type="controls_if"></block>
+      <block type="logic_compare"></block>
+      <block type="logic_operation"></block>
+      <block type="logic_negate"></block>
+      <block type="logic_boolean"></block>
+    </category>
+    <category name="Циклы" colour="%{BKY_LOOPS_HUE}">
+      <block type="controls_repeat_ext">
+        <value name="TIMES">
+          <block type="math_number">
+            <field name="NUM">10</field>
+          </block>
+        </value>
+      </block>
+      <block type="controls_whileUntil"></block>
+    </category>
+    <category name="Математические" colour="%{BKY_MATH_HUE}">
+      <block type="math_number">
+        <field name="NUM">123</field>
+      </block>
+      <block type="math_arithmetic"></block>
+      <block type="math_single"></block>
+    </category>
+    <category name="Работа с текстом" colour="%{BKY_TEXTS_HUE}">
+      <block type="text"></block>
+      <block type="text_length"></block>
+      <block type="text_print"></block>
+    </category>
+  </xml>
+
+  <xml id="startBlocks" style="display: none">
+    <block type="controls_if" inline="false" x="20" y="20">
+      <mutation else="1"></mutation>
+      <value name="IF0">
+        <block type="logic_compare" inline="true">
+          <field name="OP">EQ</field>
+          <value name="A">
+            <block type="math_arithmetic" inline="true">
+              <field name="OP">MULTIPLY</field>
+              <value name="A">
+                <block type="math_number">
+                  <field name="NUM">6</field>
+                </block>
+              </value>
+              <value name="B">
+                <block type="math_number">
+                  <field name="NUM">7</field>
+                </block>
+              </value>
+            </block>
+          </value>
+          <value name="B">
+            <block type="math_number">
+              <field name="NUM">42</field>
+            </block>
+          </value>
+        </block>
+      </value>
+      <statement name="DO0">
+        <block type="text_print" inline="false">
+          <value name="TEXT">
+            <block type="text">
+              <field name="TEXT">Сделать набор через оператора Beeline</field>
+            </block>
+          </value>
+        </block>
+      </statement>
+      <statement name="ELSE">
+        <block type="text_print" inline="false">
+          <value name="TEXT">
+            <block type="text">
+              <field name="TEXT">Закончить набор. Разорвать соединение.</field>
+            </block>
+          </value>
+        </block>
+      </statement>
+    </block>
+  </xml>
+
+
 
 </body>
 </html>
