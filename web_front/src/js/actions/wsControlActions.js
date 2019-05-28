@@ -22,7 +22,7 @@ function wsConnectAct(wsUrl, nickname) {
 
 
 
-    var socket = new WebSocket("ws://192.168.13.97:8019")
+    var socket = new WebSocket(wsUrl)
 
     
     

@@ -202,7 +202,7 @@ wsServer.listen(wsPort)
 console.log('|--------------------------|')
 console.log('|\x1b[36m Websocket server started \x1b[0m|')
 console.log('|--------------------------|')
-console.log('  ws://192.168.13.97:%d', wsPort)
+console.log('  ws://localhost:%d', wsPort)
 console.log('  connections now: ', wsServer.connections.length)
 console.log()
 

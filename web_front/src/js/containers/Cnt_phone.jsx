@@ -150,7 +150,7 @@ class Cnt_phone extends React.Component {
               <br />
               <Button variant="contained" color='primary' onClick={this.injectBlockly}>Показать текущую логику обработки вызова</Button>
               <br />
-              <div id="blocklyDiv" style={{height: '800px', width: '1600px'}}></div>
+              <div id="blocklyDiv" style={{height: '700px', width: '1600px'}}></div>
               <br />
               <button onClick={this.showCode}>Код который выполнит АТС</button><br />
               <button onClick={this.runCode}>Пезультат логической цепочки</button><br />

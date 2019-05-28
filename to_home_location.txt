@@ -1,0 +1,24 @@
+sudo openvpn --config home_ars.ovpn
+sudo route del -net 0.0.0.0 gw 192.168.201.1 netmask 128.0.0.0
+sudo route del -net 128.0.0.0 gw 192.168.201.1 netmask 128.0.0.0
+
+
+
+# Переезд
+sed -i -e "s/192.168.13.97/109.173.22.60/" ~/share/git/asterisk-ws-react/web_front/build/index.html
+sed -i -e "s/192.168.13.97/109.173.22.60/" ~/share/git/asterisk-ws-react/node_back/api/swagger.yaml
+sed -i -e "s/192.168.13.97/109.173.22.60/" ~/share/git/zabbix-react/node-back/api/zabbix-api.yaml
+
+# Вернуть взад назад
+sed -i -e "s/109.173.22.60/192.168.13.97/" ~/share/git/asterisk-ws-react/web_front/build/index.html
+sed -i -e "s/109.173.22.60/192.168.13.97/" ~/share/git/asterisk-ws-react/node_back/api/swagger.yaml
+sed -i -e "s/109.173.22.60/192.168.13.97/" ~/share/git/zabbix-react/node-back/api/zabbix-api.yaml
+
+
+
+# Рестарт
+sudo docker attach asterisk-ws-react
+  node /asterisk-ws-react/node_back/index.js $AMI_HOST $AMI_PORT $AMI_USER $AMI_SECRET $OPENAPI_PORT $WS_PORT $DB_HOST $DB_USER $DB_PASS
+
+sudo docker attach zabbix-reactor-node
+  node index.js zxSettings_intellin.json

@@ -90088,7 +90088,7 @@ function wsConnectAct(wsUrl, nickname) {
         'message': 'Попытка соединения с ' + wsUrl
       }
     });
-    var socket = new WebSocket("ws://192.168.13.97:8019");
+    var socket = new WebSocket(wsUrl);
 
     socket.onopen = function () {
       dispatch({
@@ -92093,7 +92093,7 @@ function (_React$Component) {
       }, "\u041F\u043E\u043A\u0430\u0437\u0430\u0442\u044C \u0442\u0435\u043A\u0443\u0449\u0443\u044E \u043B\u043E\u0433\u0438\u043A\u0443 \u043E\u0431\u0440\u0430\u0431\u043E\u0442\u043A\u0438 \u0432\u044B\u0437\u043E\u0432\u0430"), _react["default"].createElement("br", null), _react["default"].createElement("div", {
         id: "blocklyDiv",
         style: {
-          height: '800px',
+          height: '700px',
           width: '1600px'
         }
       }), _react["default"].createElement("br", null), _react["default"].createElement("button", {
